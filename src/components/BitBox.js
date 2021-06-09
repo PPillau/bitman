@@ -6,7 +6,7 @@ export default function BitBox({ bit, ac }) {
   return (
     <span
       className={classNames(
-        'flex inline-block justify-center rounded-md items-center text-white font-extrabold text-center h-12 w-8 px-2 py-2 mr-2',
+        'flex inline-block justify-center rounded-md items-center text-white font-extrabold text-center h-12 w-8 px-2 py-2 mx-2',
         { 'bg-blue-600': !active, 'bg-green-600': active }
       )}
     >
