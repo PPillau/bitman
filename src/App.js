@@ -6,13 +6,14 @@ import classNames from 'classnames';
 
 function App() {
   const [activeInput, setActiveInput] = React.useState(false);
-  const [content, setContent] = React.useState([
-    <BitBox key='0' bit='1' active={true}></BitBox>,
-  ]);
+  const [bitContent, setBitContent] = React.useState('');
+  const [hexContent, setHexContent] = React.useState('');
+  const [decContent, setDecContent] = React.useState('');
+  const [content, setContent] = React.useState([]);
 
-  const handleActiveInput = (e) => {
+  const handleActiveInput = React.useCallback((e) => {
     setActiveInput(true);
-  };
+  }, []);
 
   const handleKeyInput = React.useCallback(
     (e) => {
@@ -25,29 +26,50 @@ function App() {
         '-----------------------------------------'
       );
       if (activeInput && numRegex.test(parseInt(e.key))) {
+        let temp = bitContent + e.key;
+        setBitContent(temp);
+        setHexContent(parseInt(temp, 2).toString(16));
+        setDecContent(parseInt(temp, 2).toString(10));
         setContent([
           ...content,
           <BitBox key={content.length} bit={e.key} active={false}></BitBox>,
         ]);
       }
     },
-    [activeInput, content]
+    [activeInput, content, bitContent, hexContent]
   );
 
   React.useEffect(() => {
-    document.body.addEventListener('keypress', handleKeyInput);
-  }, []);
+    window.addEventListener('keydown', handleKeyInput);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyInput);
+    };
+  }, [handleKeyInput]);
 
   return (
     <div className='App'>
       <div
-        className={classNames('border-2 p-1 flex justify-start', {
-          'border-black': activeInput,
-          'border-grey-100': !activeInput,
-        })}
+        className={classNames(
+          'border-2 h-20 p-1 flex justify-start items-center',
+          {
+            'border-black': activeInput,
+            'border-grey-100': !activeInput,
+          }
+        )}
         onClick={handleActiveInput}
       >
         {content}
+      </div>
+      <div className='text-2xl'>
+        {' '}
+        <span className='mr-6'>
+          Hex: <span className='font-bold'>0x</span>
+          <span className='uppercase font-bold'>{hexContent}</span>
+        </span>
+        <span className='mr-6'>
+          Decimal: <span className='uppercase font-bold'>{decContent}</span>
+        </span>
       </div>
     </div>
   );
