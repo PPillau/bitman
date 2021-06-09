@@ -1,18 +1,18 @@
 import './components/BitBox';
 import './App.css';
-import BitBox from './components/BitBox';
+import { BitList } from './BitList';
 import React from 'react';
 import classNames from 'classnames';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 function App() {
-  const cursor = <span key='-1' className='cursor h-12'></span>;
-  const [cursorPos, setCursorPos] = React.useState(1);
+  const [list, setList] = React.useState(new BitList(''));
   const [activeInput, setActiveInput] = React.useState(false);
-  const [bitContent, setBitContent] = React.useState('');
-  const [hexContent, setHexContent] = React.useState('');
-  const [asciiContent, setAsciiContent] = React.useState('');
-  const [decContent, setDecContent] = React.useState('');
-  const [content, setContent] = React.useState([cursor]);
+  const [value, setValue] = React.useState(0); // integer state
+
+  function forceUpdate() {
+    setValue(value + 1);
+  }
 
   const handleActiveInput = React.useCallback((e) => {
     setActiveInput(true);
@@ -20,112 +20,43 @@ function App() {
 
   const handleClearClick = React.useCallback(
     (e) => {
-      setContent([cursor]);
-      setCursorPos(1);
-      setBitContent('');
-      setHexContent('');
-      setDecContent('');
+      list.clear();
+
+      forceUpdate();
     },
-    [content, bitContent, hexContent, cursorPos, cursor]
+    [list, value]
   );
 
   const handleInvertClick = React.useCallback(
     (e) => {
-      let temp = [];
-      let temp2 = '';
-      for (let i = 0; i < bitContent.length; i++) {
-        if (bitContent.charAt(i) == '0') {
-          temp2 += '1';
-          if (cursorPos - 1 == i) {
-            temp.push(cursor);
-          } else {
-            temp.push(<BitBox key={i} bit='1' active={false}></BitBox>);
-          }
-        } else {
-          temp2 += '0';
-          if (cursorPos - 1 == i) {
-            temp.push(cursor);
-          } else {
-            temp.push(<BitBox key={i} bit='0' active={false}></BitBox>);
-          }
-        }
-      }
-      setContent(temp);
-      setBitContent(temp2);
-      setHexContent(parseInt(temp2, 2).toString(16));
-      setDecContent(parseInt(temp2, 2).toString(10));
+      list.invert();
+      console.log(list, '-----------------------------------------');
+
+      forceUpdate();
     },
-    [content, bitContent, hexContent, cursorPos, cursor]
+    [list, value]
   );
 
   const handleKeyInput = React.useCallback(
     (e) => {
-      const addInString = (str, pos, bit) => {
-        return str.substr(0, pos) + bit + str.substr(pos, str.length);
-      };
-      const deleteFromString = (str, pos) => {
-        return str.substr(0, pos - 1) + str.substr(pos, str.length);
-      };
       const numRegex = new RegExp('^[01]$');
       if (activeInput) {
         if (numRegex.test(parseInt(e.key))) {
-          let temp = addInString(bitContent, cursorPos - 1, e.key);
-          setBitContent(temp);
-          setHexContent(parseInt(temp, 2).toString(16));
-          setDecContent(parseInt(temp, 2).toString(10));
-          setAsciiContent(String.fromCharCode(parseInt(temp, 2)));
-          let temp2 = content;
-          temp2.splice(
-            cursorPos - 1,
-            0,
-            <BitBox key={content.length} bit={e.key} active={false}></BitBox>
-          );
-          setContent(temp2);
-          setCursorPos(cursorPos + 1);
+          list.addSaveToList(true, e.key, false);
         } else if (e.which == 39) {
           //right
-          if (cursorPos + 1 <= content.length) {
-            let temp = content;
-            let temp2 = cursorPos - 1;
-            temp.splice(temp2, 1);
-            temp.splice(cursorPos, 0, cursor);
-            setCursorPos(cursorPos + 1);
-            setContent(temp);
-          }
+          list.moveCursor(false);
         } else if (e.which == 37) {
           //left
-          if (cursorPos - 1 > 0) {
-            let temp = content;
-            let temp2 = cursorPos - 1;
-            temp.splice(temp2, 1);
-            temp.splice(cursorPos - 2, 0, cursor);
-            setCursorPos(temp2);
-            setContent(temp);
-          }
+          list.moveCursor(true);
         } else if (e.which == 8) {
-          if (cursorPos > 1) {
-            let temp = content;
-            let temp2 = deleteFromString(bitContent, cursorPos - 1);
-            temp.splice(cursorPos - 2, 1);
-            setContent(temp);
-            setBitContent(temp2);
-            setHexContent(parseInt(temp2, 2).toString(16));
-            setDecContent(parseInt(temp2, 2).toString(10));
-            setAsciiContent(String.fromCharCode(parseInt(temp2, 2)));
-            setCursorPos(cursorPos - 1);
-          }
+          list.deleteSaveFromList();
         }
+        console.log(list, '-----------------------------------------');
+        forceUpdate();
       }
     },
-    [
-      activeInput,
-      content,
-      bitContent,
-      hexContent,
-      asciiContent,
-      cursorPos,
-      cursor,
-    ]
+    [activeInput, value, list]
   );
 
   React.useEffect(() => {
@@ -148,19 +79,21 @@ function App() {
         )}
         onClick={handleActiveInput}
       >
-        {content}
+        {list.render()}
       </div>
       <div className='text-2xl'>
         {' '}
         <span className='mr-6'>
           Hex: <span className='font-bold'>0x</span>
-          <span className='uppercase font-bold'>{hexContent}</span>
+          <span className='uppercase font-bold'>{list.getHexValue()}</span>
         </span>
         <span className='mr-6'>
-          Decimal: <span className='uppercase font-bold'>{decContent}</span>
+          Decimal:{' '}
+          <span className='uppercase font-bold'>{list.getDecValue()}</span>
         </span>
         <span className='mr-6'>
-          ASCII: <span className='uppercase font-bold'>{asciiContent}</span>
+          Unicode:{' '}
+          <span className='uppercase font-bold'>{list.getUnicodeValue()}</span>
         </span>
       </div>
       <div>
@@ -172,10 +105,15 @@ function App() {
         </button>
         <button
           onClick={handleInvertClick}
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 rounded'
         >
           Invert
         </button>
+        <CopyToClipboard text={list.bitString}>
+          <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            Copy to clipboard
+          </button>
+        </CopyToClipboard>
       </div>
     </div>
   );
