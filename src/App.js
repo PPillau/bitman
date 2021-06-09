@@ -71,7 +71,7 @@ function App() {
     <div className='App'>
       <div
         className={classNames(
-          'border-2 h-20 p-1 flex justify-start items-center',
+          'border-2 h-20 p-1 flex justify-start items-center cursor-pointer',
           {
             'border-black': activeInput,
             'border-grey-100': !activeInput,
