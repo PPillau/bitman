@@ -1,3 +1,4 @@
+import BitBox2 from './components/BitBox2';
 import './components/BitBox';
 import './App.css';
 import { BitList } from './BitList';
@@ -114,6 +115,81 @@ function App() {
             Copy to clipboard
           </button>
         </CopyToClipboard>
+      </div>
+
+      <div
+        className={classNames(
+          'bit_container border-2 mt-10 p-1 flex justify-start items-center cursor-pointer'
+        )}
+      >
+        <div className='cell bit filler'></div>
+
+        <div className='cell bit'>
+          <BitBox2 bit='0'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='0'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='0'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='0'></BitBox2>
+        </div>
+        <div className='cell bit'>
+          <BitBox2 bit='1'></BitBox2>
+        </div>
+        <div className='cell bit_number filler'></div>
+
+        <div className='cell bit_number'>10</div>
+        <div className='cell bit_number'>9</div>
+        <div className='cell bit_number'>8</div>
+        <div className='cell bit_number'>7</div>
+        <div className='cell bit_number'>6</div>
+        <div className='cell bit_number'>5</div>
+        <div className='cell bit_number'>4</div>
+        <div className='cell bit_number'>3</div>
+        <div className='cell bit_number'>2</div>
+        <div className='cell bit_number'>1</div>
+        <div className='cell byte_ruler left-border'>
+          <span className='byte_label'>Byte 2</span>
+        </div>
+        <div className='cell byte_ruler right-border'>
+          <span className='byte_label'>Byte 1</span>
+        </div>
+        <div className='cell value_labels'>
+          <span className='mx-5'>
+            Hex: <span className='font-bold'>0x</span>
+            <span className='uppercase font-bold'>-</span>
+          </span>
+          <span className='mx-5'>
+            Dec: <span className='font-bold'>-</span>
+          </span>
+        </div>
+        <div className='cell value_labels'>
+          <span className='mx-5'>
+            Hex: <span className='font-bold'>0x</span>
+            <span className='uppercase font-bold'>B5</span>
+          </span>
+          <span className='mx-5'>
+            Dec: <span className='font-bold'>181</span>
+          </span>
+        </div>
       </div>
     </div>
   );
