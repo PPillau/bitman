@@ -4,7 +4,6 @@ import { BitList } from './BitList';
 import React from 'react';
 import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import ByteRuler from './components/ByteRuler';
 import ByteValueLabels from './components/ByteValueLabels';
 
 function App() {
@@ -85,10 +84,9 @@ function App() {
       >
         {list.render()}
         {list.renderBitNumbers()}
-        <ByteRuler>2</ByteRuler>
-        <ByteRuler>1</ByteRuler>
-        <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
-        <ByteValueLabels hex='5B' dec='181'></ByteValueLabels>
+        {list.renderBytes()}
+        {/* <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
+        <ByteValueLabels hex='5B' dec='181'></ByteValueLabels> */}
       </div>
     </div>
   );
