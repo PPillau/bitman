@@ -177,7 +177,7 @@ class BitList {
         this.cursorToLeft = true;
         this.addToList(false, null, null, null, 0);
       }
-    } else if (!left && this.cursorPos + 1 <= this.bitString.length) {
+    } else if (!left && this.cursorPos + 1 < this.bitString.length) {
       this.list[this.cursorPos].bitElem = (
         <BitBox
           key={this.list[this.cursorPos].key}

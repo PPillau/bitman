@@ -1,0 +1,34 @@
+<div className='text-2xl'>
+        {' '}
+        <span className='mr-6'>
+          Hex: <span className='font-bold'>0x</span>
+          <span className='uppercase font-bold'>{list.getHexValue()}</span>
+        </span>
+        <span className='mr-6'>
+          Decimal:{' '}
+          <span className='uppercase font-bold'>{list.getDecValue()}</span>
+        </span>
+        <span className='mr-6'>
+          Unicode:{' '}
+          <span className='uppercase font-bold'>{list.getUnicodeValue()}</span>
+        </span>
+      </div>
+      <div>
+        <button
+          onClick={handleClearClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 rounded'
+        >
+          Clear
+        </button>
+        <button
+          onClick={handleInvertClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 rounded'
+        >
+          Invert
+        </button>
+        <CopyToClipboard text={list.bitString}>
+          <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+            Copy to clipboard
+          </button>
+        </CopyToClipboard>
+      </div>

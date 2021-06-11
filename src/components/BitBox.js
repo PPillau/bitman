@@ -8,7 +8,7 @@ export default function BitBox({ bit, ac, children, cursorToLeft = false }) {
       {cursorToLeft && children}
       <span
         className={classNames(
-          'flex inline-block justify-center rounded-md items-center text-white font-extrabold text-center h-12 w-8 px-2 py-2',
+          'flex inline-block cursor-pointer justify-center rounded-md items-center text-white font-extrabold text-center h-12 w-8 px-2 py-2',
           { 'bg-blue-600': !active, 'bg-green-600': active }
         )}
       >

@@ -75,7 +75,7 @@ function App() {
     <div className='App'>
       <div
         className={classNames(
-          'bit_container border-2 p-1 flex justify-start items-center cursor-pointer',
+          'bit_container border-2 p-1 flex justify-start items-center cursor-text',
           {
             'border-black': activeInput,
             'border-grey-100': !activeInput,
@@ -85,32 +85,6 @@ function App() {
       >
         {list.render()}
         {list.renderBitNumbers()}
-        {/* <Filler bit={true} span={6}></Filler>
-
-        <BitBox bit='0'></BitBox>
-        <BitBox bit='1'></BitBox>
-        <BitBox bit='1'></BitBox>
-        <BitBox bit='0'></BitBox>
-        <BitBox bit='1'></BitBox>
-        <BitBox bit='1'></BitBox>
-        <BitBox bit='0'>
-          <span key='-1' className='cursor h-12'></span>
-        </BitBox>
-        <BitBox bit='1'></BitBox>
-        <BitBox bit='0'></BitBox>
-        <BitBox bit='1'></BitBox>
-        <Filler bit={false} span={6}></Filler>
-
-        <BitNumber>10</BitNumber>
-        <BitNumber>9</BitNumber>
-        <BitNumber>8</BitNumber>
-        <BitNumber>7</BitNumber>
-        <BitNumber>6</BitNumber>
-        <BitNumber>5</BitNumber>
-        <BitNumber>4</BitNumber>
-        <BitNumber>3</BitNumber>
-        <BitNumber>2</BitNumber>
-        <BitNumber>1</BitNumber>*/}
         <ByteRuler>2</ByteRuler>
         <ByteRuler>1</ByteRuler>
         <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
