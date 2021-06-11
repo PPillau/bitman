@@ -27,6 +27,17 @@ body {
   border: 1px solid black;
   width: 1px;
   animation: 1s blink step-end infinite;
+  position: absolute;
+  right: -1px;
+}
+
+.cursor_left {
+  top: -1.5rem;
+  left: 0 !important;
+}
+
+.cursor_left2 {
+  left: 0 !important;
 }
 
 .bit_container {
@@ -44,14 +55,33 @@ body {
   justify-content: center;
 }
 
-.filler {
+.filler7 {
+  grid-column-end: span 7;
+}
+.filler6 {
   grid-column-end: span 6;
+}
+.filler5 {
+  grid-column-end: span 5;
+}
+.filler4 {
+  grid-column-end: span 4;
+}
+.filler3 {
+  grid-column-end: span 3;
+}
+.filler2 {
+  grid-column-end: span 2;
+}
+.filler1 {
+  grid-column-end: span 1;
 }
 
 .bit {
   grid-row-start: 1;
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 .bit_number {
@@ -70,7 +100,7 @@ body {
   top: 0;
 }
 
-.filler.bit_number::before {
+.f.bit_number::before {
   display: none;
 }
 

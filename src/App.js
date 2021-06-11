@@ -1,10 +1,11 @@
-import BitBox2 from './components/BitBox2';
 import './components/BitBox';
 import './App.css';
 import { BitList } from './BitList';
 import React from 'react';
 import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import ByteRuler from './components/ByteRuler';
+import ByteValueLabels from './components/ByteValueLabels';
 
 function App() {
   const [list, setList] = React.useState(new BitList(''));
@@ -61,6 +62,8 @@ function App() {
   );
 
   React.useEffect(() => {
+    console.log(list, '-----------------------------------------');
+
     window.addEventListener('keydown', handleKeyInput);
 
     return () => {
@@ -72,7 +75,7 @@ function App() {
     <div className='App'>
       <div
         className={classNames(
-          'border-2 h-20 p-1 flex justify-start items-center cursor-pointer',
+          'bit_container border-2 p-1 flex justify-start items-center cursor-pointer',
           {
             'border-black': activeInput,
             'border-grey-100': !activeInput,
@@ -81,115 +84,37 @@ function App() {
         onClick={handleActiveInput}
       >
         {list.render()}
-      </div>
-      <div className='text-2xl'>
-        {' '}
-        <span className='mr-6'>
-          Hex: <span className='font-bold'>0x</span>
-          <span className='uppercase font-bold'>{list.getHexValue()}</span>
-        </span>
-        <span className='mr-6'>
-          Decimal:{' '}
-          <span className='uppercase font-bold'>{list.getDecValue()}</span>
-        </span>
-        <span className='mr-6'>
-          Unicode:{' '}
-          <span className='uppercase font-bold'>{list.getUnicodeValue()}</span>
-        </span>
-      </div>
-      <div>
-        <button
-          onClick={handleClearClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 rounded'
-        >
-          Clear
-        </button>
-        <button
-          onClick={handleInvertClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 rounded'
-        >
-          Invert
-        </button>
-        <CopyToClipboard text={list.bitString}>
-          <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
-            Copy to clipboard
-          </button>
-        </CopyToClipboard>
-      </div>
+        {list.renderBitNumbers()}
+        {/* <Filler bit={true} span={6}></Filler>
 
-      <div
-        className={classNames(
-          'bit_container border-2 mt-10 p-1 flex justify-start items-center cursor-pointer'
-        )}
-      >
-        <div className='cell bit filler'></div>
+        <BitBox bit='0'></BitBox>
+        <BitBox bit='1'></BitBox>
+        <BitBox bit='1'></BitBox>
+        <BitBox bit='0'></BitBox>
+        <BitBox bit='1'></BitBox>
+        <BitBox bit='1'></BitBox>
+        <BitBox bit='0'>
+          <span key='-1' className='cursor h-12'></span>
+        </BitBox>
+        <BitBox bit='1'></BitBox>
+        <BitBox bit='0'></BitBox>
+        <BitBox bit='1'></BitBox>
+        <Filler bit={false} span={6}></Filler>
 
-        <div className='cell bit'>
-          <BitBox2 bit='0'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='0'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='0'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='0'></BitBox2>
-        </div>
-        <div className='cell bit'>
-          <BitBox2 bit='1'></BitBox2>
-        </div>
-        <div className='cell bit_number filler'></div>
-
-        <div className='cell bit_number'>10</div>
-        <div className='cell bit_number'>9</div>
-        <div className='cell bit_number'>8</div>
-        <div className='cell bit_number'>7</div>
-        <div className='cell bit_number'>6</div>
-        <div className='cell bit_number'>5</div>
-        <div className='cell bit_number'>4</div>
-        <div className='cell bit_number'>3</div>
-        <div className='cell bit_number'>2</div>
-        <div className='cell bit_number'>1</div>
-        <div className='cell byte_ruler left-border'>
-          <span className='byte_label'>Byte 2</span>
-        </div>
-        <div className='cell byte_ruler right-border'>
-          <span className='byte_label'>Byte 1</span>
-        </div>
-        <div className='cell value_labels'>
-          <span className='mx-5'>
-            Hex: <span className='font-bold'>0x</span>
-            <span className='uppercase font-bold'>-</span>
-          </span>
-          <span className='mx-5'>
-            Dec: <span className='font-bold'>-</span>
-          </span>
-        </div>
-        <div className='cell value_labels'>
-          <span className='mx-5'>
-            Hex: <span className='font-bold'>0x</span>
-            <span className='uppercase font-bold'>B5</span>
-          </span>
-          <span className='mx-5'>
-            Dec: <span className='font-bold'>181</span>
-          </span>
-        </div>
+        <BitNumber>10</BitNumber>
+        <BitNumber>9</BitNumber>
+        <BitNumber>8</BitNumber>
+        <BitNumber>7</BitNumber>
+        <BitNumber>6</BitNumber>
+        <BitNumber>5</BitNumber>
+        <BitNumber>4</BitNumber>
+        <BitNumber>3</BitNumber>
+        <BitNumber>2</BitNumber>
+        <BitNumber>1</BitNumber>*/}
+        <ByteRuler>2</ByteRuler>
+        <ByteRuler>1</ByteRuler>
+        <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
+        <ByteValueLabels hex='5B' dec='181'></ByteValueLabels>
       </div>
     </div>
   );

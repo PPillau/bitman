@@ -1,5 +1,8 @@
-import BitBox from './components/BitBox';
 import React from 'react';
+
+import BitBox from './components/BitBox';
+import BitNumber from './components/BitNumber';
+import Filler from './components/Filler';
 
 class BitList {
   constructor(_bitString) {
@@ -9,16 +12,23 @@ class BitList {
     this.indices = [];
 
     this.cursor = <span key='-1' className='cursor h-12'></span>;
+    this.cursorBlank = (
+      <span key='-1' className='cursor cursor_left h-12'></span>
+    );
+    this.cursorBlank2 = (
+      <span key='-1' className='cursor cursor_left2 h-12'></span>
+    );
+    this.cursorToLeft = false;
     this.numRegex = new RegExp('^[01]$');
 
     let i = 0;
+    this.addToList(false, null, null, null, i);
     if (_bitString != '') {
       for (; i < _bitString.length; i++) {
         this.addToList(true, _bitString.charAt(i), false, i, i);
         this.indices.push(i);
       }
     }
-    this.addToList(false, null, null, null, i);
   }
 
   addSaveToList(_isBit, _bit, _active) {
@@ -29,10 +39,43 @@ class BitList {
           break;
         }
       }
-      this.addToList(true, _bit, _active, i, this.cursorPos);
+      if (this.list[this.cursorPos].isBit) {
+        this.list[this.cursorPos].bitElem = (
+          <BitBox
+            key={this.list[this.cursorPos].key}
+            bit={this.list[this.cursorPos].bit}
+            active={this.list[this.cursorPos].active}
+          ></BitBox>
+        );
+        this.addToList(
+          true,
+          _bit,
+          _active,
+          i,
+          this.cursorToLeft ? 0 : this.cursorPos + 1
+        );
+
+        const tempToLeft = this.cursorToLeft;
+        if (this.cursorToLeft) {
+          this.cursorToLeft = false;
+        }
+        this.addToList(
+          false,
+          null,
+          null,
+          null,
+          tempToLeft ? 0 : this.cursorPos + 1
+        );
+        if (!tempToLeft) {
+          this.cursorPos++;
+        }
+      } else {
+        this.deleteFromList(this.cursorPos);
+        this.addToList(true, _bit, _active, i, this.cursorPos);
+        this.addToList(false, null, null, null, this.cursorPos);
+      }
       this.indices.push(i);
       this.indices.sort((a, b) => a - b);
-      this.cursorPos++;
     }
   }
 
@@ -43,9 +86,9 @@ class BitList {
         bit: _bit,
         active: _active,
         key: _key,
-        elem: null,
+        bitElem: null,
       });
-      this.list[pos].elem = (
+      this.list[pos].bitElem = (
         <BitBox
           key={this.list[pos].key}
           bit={this.list[pos].bit}
@@ -54,11 +97,23 @@ class BitList {
       );
       this.addToSting(_bit, pos);
     } else {
-      this.list.splice(pos, 0, {
-        isBit: false,
-        elem: this.cursor,
-      });
-      this.cursorPos = pos;
+      if (this.list[pos]) {
+        this.list[pos].bitElem = (
+          <BitBox
+            key={this.list[pos].key}
+            bit={this.list[pos].bit}
+            active={this.list[pos].active}
+            cursorToLeft={this.cursorToLeft}
+          >
+            {this.cursorToLeft ? this.cursorBlank2 : this.cursor}
+          </BitBox>
+        );
+      } else {
+        this.list.splice(pos, 0, {
+          isBit: false,
+          bitElem: <div className='cell bit'>{this.cursorBlank}</div>,
+        });
+      }
     }
   }
 
@@ -70,21 +125,23 @@ class BitList {
   }
 
   deleteSaveFromList() {
-    if (this.list[this.cursorPos - 1]) {
-      this.deleteFromSting(this.cursorPos - 1);
+    if (this.list[this.cursorPos].isBit) {
+      this.deleteFromSting(this.cursorPos);
       this.indices.splice(
-        this.indices.findIndex((el) => el == this.list[this.cursorPos - 1].key),
+        this.indices.findIndex((el) => el == this.list[this.cursorPos].key),
         1
       );
-      this.list.splice(this.cursorPos - 1, 1);
-      this.cursorPos--;
+      this.list.splice(this.cursorPos, 1);
+      const newCursorPos = this.cursorPos - 1 >= 0 ? this.cursorPos - 1 : 0;
+      this.addToList(false, null, null, null, newCursorPos);
+      this.cursorPos = newCursorPos;
       this.indices.sort((a, b) => a - b);
     }
   }
 
   deleteFromList(pos) {
     if (this.list[pos]) {
-      if (this.list[pos].elem != this.cursor) {
+      if (this.list[pos].bitElem != this.cursor) {
         this.deleteFromSting(pos);
       }
       this.list.splice(pos, 1);
@@ -98,14 +155,43 @@ class BitList {
   }
 
   moveCursor(left) {
-    if (left && this.cursorPos - 1 >= 0) {
-      this.deleteFromList(this.cursorPos);
-      this.cursorPos--;
-      this.addToList(false, null, null, null, this.cursorPos);
+    if (left) {
+      if (this.cursorPos - 1 >= 0) {
+        this.list[this.cursorPos].bitElem = (
+          <BitBox
+            key={this.list[this.cursorPos].key}
+            bit={this.list[this.cursorPos].bit}
+            active={this.list[this.cursorPos].active}
+          ></BitBox>
+        );
+        this.addToList(false, null, null, null, this.cursorPos - 1);
+        this.cursorPos--;
+      } else if (!this.cursorToLeft && this.cursorPos - 1 == -1) {
+        this.list[this.cursorPos].bitElem = (
+          <BitBox
+            key={this.list[this.cursorPos].key}
+            bit={this.list[this.cursorPos].bit}
+            active={this.list[this.cursorPos].active}
+          ></BitBox>
+        );
+        this.cursorToLeft = true;
+        this.addToList(false, null, null, null, 0);
+      }
     } else if (!left && this.cursorPos + 1 <= this.bitString.length) {
-      this.deleteFromList(this.cursorPos);
-      this.cursorPos++;
-      this.addToList(false, null, null, null, this.cursorPos);
+      this.list[this.cursorPos].bitElem = (
+        <BitBox
+          key={this.list[this.cursorPos].key}
+          bit={this.list[this.cursorPos].bit}
+          active={this.list[this.cursorPos].active}
+        ></BitBox>
+      );
+      if (!this.cursorToLeft) {
+        this.addToList(false, null, null, null, this.cursorPos + 1);
+        this.cursorPos++;
+      } else {
+        this.cursorToLeft = false;
+        this.addToList(false, null, null, null, 0);
+      }
     }
   }
 
@@ -114,7 +200,7 @@ class BitList {
     this.list = [
       {
         isBit: false,
-        elem: this.cursor,
+        bitElem: this.cursor,
       },
     ];
     this.indices = [];
@@ -142,7 +228,7 @@ class BitList {
   change(bit, pos) {
     let listElem = this.getSaveFromList(pos);
     listElem.bit = bit;
-    listElem.elem = (
+    listElem.bitElem = (
       <BitBox
         key={listElem.key}
         bit={listElem.bit}
@@ -160,7 +246,15 @@ class BitList {
   }
 
   render() {
-    return this.list.map((x) => x.elem);
+    return this.list.map((x) => x.bitElem);
+  }
+
+  renderBitNumbers() {
+    let result = [];
+    for (let i = this.bitString.length; i > 0; i--) {
+      result.push(<BitNumber key={i}>{i}</BitNumber>);
+    }
+    return result;
   }
 
   getHexValue() {
