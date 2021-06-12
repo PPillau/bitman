@@ -129,13 +129,8 @@ class BitList {
         unfinished_counter--;
       } else {
         const startPos = (this.bitString.length % 8) + (i - unfinished) * 8;
-        const endPos = startPos + 8;
-        const hexVal = this.getHexValue(
-          this.bitString.substr(startPos, endPos)
-        );
-        const decVal = this.getDecValue(
-          this.bitString.substr(startPos, endPos)
-        );
+        const hexVal = this.getHexValue(this.bitString.substr(startPos, 8));
+        const decVal = this.getDecValue(this.bitString.substr(startPos, 8));
         this.valueList[i] = (
           <ByteValueLabels hex={hexVal} dec={decVal}></ByteValueLabels>
         );
