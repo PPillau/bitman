@@ -4,7 +4,7 @@ import { BitList } from './BitList';
 import React from 'react';
 import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import ByteValueLabels from './components/ByteValueLabels';
+import { numberWithCommas } from './utils';
 
 function App() {
   const [list, setList] = React.useState(new BitList(''));
@@ -72,6 +72,30 @@ function App() {
 
   return (
     <div className='App'>
+      <div className='mb-4'>
+        <span className='mr-6'>
+          Hex: <span className='font-bold'>0x</span>
+          <span className='uppercase font-bold'>{list.getHexValue()}</span>
+        </span>
+        <span className='mr-6'>
+          Decimal:{' '}
+          <span className='uppercase font-bold'>
+            {numberWithCommas(list.getDecValue())}
+          </span>
+        </span>
+        <button
+          onClick={handleClearClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+        >
+          Clear
+        </button>
+
+        <CopyToClipboard text={list.bitString}>
+          <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 cursor-pointer rounded'>
+            Copy to clipboard
+          </button>
+        </CopyToClipboard>
+      </div>
       <div
         className={classNames(
           'bit_container border-2 p-1 flex justify-start items-center cursor-text',
@@ -85,8 +109,8 @@ function App() {
         {list.render()}
         {list.renderBitNumbers()}
         {list.renderBytes()}
-        {/* <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
-        <ByteValueLabels hex='5B' dec='181'></ByteValueLabels> */}
+        {list.renderValues()}
+        {list.renderByteButtons()}
       </div>
     </div>
   );

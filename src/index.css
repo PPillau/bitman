@@ -140,3 +140,8 @@ body {
   z-index: 10;
   background-color: white;
 }
+
+.byte_buttons {
+  grid-row-start: 5;
+  grid-column-end: span 8;
+}

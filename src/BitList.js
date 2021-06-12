@@ -4,12 +4,16 @@ import BitBox from './components/BitBox';
 import BitNumber from './components/BitNumber';
 import ByteRuler from './components/ByteRuler';
 import Filler from './components/Filler';
+import ByteValueLabels from './components/ByteValueLabels';
+import ByteButtons from './components/ByteButtons';
 
 class BitList {
   constructor(_bitString) {
     this.bitString = '';
     this.list = [];
     this.byteList = [];
+    this.valueList = [];
+    this.byteButtonList = [];
     this.cursorPos = 0;
     this.indices = [];
 
@@ -92,11 +96,49 @@ class BitList {
         i < currentBytes + Math.abs(byteDiff);
         i++
       ) {
+        this.valueList.splice(
+          0,
+          0,
+          <ByteValueLabels hex='-' dec='-'></ByteValueLabels>
+        );
         this.byteList.splice(0, 0, <ByteRuler key={i}>{i + 1}</ByteRuler>);
+        this.byteButtonList.splice(
+          0,
+          0,
+          <ByteButtons list={this}>{i + 1}</ByteButtons>
+        );
       }
     } else if (byteDiff > 0) {
       for (let i = 0; i < byteDiff; i++) {
         this.byteList.shift();
+        this.valueList.shift();
+        this.byteButtonList.shift();
+      }
+    }
+    this.updateValueList();
+  }
+
+  updateValueList() {
+    let unfinished_counter = Math.ceil(
+      (this.byteList.length * 8 - this.list.length) / 8
+    );
+    const unfinished = unfinished_counter;
+    for (let i = 0; i < this.valueList.length; i++) {
+      if (unfinished_counter > 0) {
+        this.valueList[i] = <ByteValueLabels hex='-' dec='-'></ByteValueLabels>;
+        unfinished_counter--;
+      } else {
+        const startPos = (this.bitString.length % 8) + (i - unfinished) * 8;
+        const endPos = startPos + 8;
+        const hexVal = this.getHexValue(
+          this.bitString.substr(startPos, endPos)
+        );
+        const decVal = this.getDecValue(
+          this.bitString.substr(startPos, endPos)
+        );
+        this.valueList[i] = (
+          <ByteValueLabels hex={hexVal} dec={decVal}></ByteValueLabels>
+        );
       }
     }
   }
@@ -221,14 +263,14 @@ class BitList {
 
   clear() {
     this.bitString = '';
-    this.list = [
-      {
-        isBit: false,
-        bitElem: this.cursor,
-      },
-    ];
+    this.list = [];
+    this.byteList = [];
+    this.valueList = [];
+    this.byteButtonList = [];
     this.indices = [];
     this.cursorPos = 0;
+    this.cursorToLeft = false;
+    this.addToList(false, null, null, null, 0);
   }
 
   changeTo(_newBitString) {
@@ -302,12 +344,28 @@ class BitList {
     return result;
   }
 
-  getHexValue() {
-    return this.getSafeOutput(parseInt(this.bitString, 2).toString(16));
+  renderValues() {
+    let result = [];
+    for (let i = 0; i < this.valueList.length; i++) {
+      result.push(this.valueList[i]);
+    }
+    return result;
   }
 
-  getDecValue() {
-    return this.getSafeOutput(parseInt(this.bitString, 2).toString(10));
+  renderByteButtons() {
+    let result = [];
+    for (let i = 0; i < this.byteButtonList.length; i++) {
+      result.push(this.byteButtonList[i]);
+    }
+    return result;
+  }
+
+  getHexValue(input = this.bitString) {
+    return this.getSafeOutput(parseInt(input, 2).toString(16));
+  }
+
+  getDecValue(input = this.bitString) {
+    return this.getSafeOutput(parseInt(input, 2).toString(10));
   }
 
   getUnicodeValue() {
@@ -327,6 +385,20 @@ class BitList {
       _bitString.length - this.bitString.length,
       _bitString.length
     );
+  }
+
+  getByte(pos) {
+    const unfinished = Math.ceil(
+      (this.byteList.length * 8 - this.list.length) / 8
+    );
+    if (unfinished > 0 && pos == this.byteList.length) {
+      return this.bitString.substr(0, this.bitString.length % 8);
+    } else {
+      const startPos =
+        (this.bitString.length % 8) +
+        (this.byteList.length - unfinished - pos) * 8;
+      return this.bitString.substr(startPos, 8);
+    }
   }
 }
 
