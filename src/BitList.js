@@ -8,7 +8,7 @@ import ByteValueLabels from './components/ByteValueLabels';
 import ByteButtons from './components/ByteButtons';
 
 class BitList {
-  constructor(_bitString) {
+  constructor(_bitString, _forceUpdate) {
     this.bitString = '';
     this.list = [];
     this.byteList = [];
@@ -16,6 +16,7 @@ class BitList {
     this.byteButtonList = [];
     this.cursorPos = 0;
     this.indices = [];
+    this.forceUpdate = _forceUpdate;
 
     this.cursor = <span key='-1' className='cursor h-12'></span>;
     this.cursorBlank = (
@@ -105,7 +106,9 @@ class BitList {
         this.byteButtonList.splice(
           0,
           0,
-          <ByteButtons list={this}>{i + 1}</ByteButtons>
+          <ByteButtons list={this} fu={this.forceUpdate}>
+            {i + 1}
+          </ByteButtons>
         );
       }
     } else if (byteDiff > 0) {
@@ -268,35 +271,57 @@ class BitList {
     this.addToList(false, null, null, null, 0);
   }
 
-  changeTo(_newBitString) {
+  changeToNewStringAt(_newBitString, pos) {
     let bit = '';
+
     for (let i = 0; i < _newBitString.length; i++) {
+      if (i + pos > this.list.length) {
+        return;
+      }
       bit = _newBitString.charAt(i);
-      this.change(bit, i);
+      this.change(bit, i + pos);
     }
   }
 
-  getSaveFromList(pos) {
-    return pos >= this.cursorPos ? this.list[pos + 1] : this.list[pos];
-  }
-
   invert() {
-    this.changeTo(
-      this.getRealBitSize(this.dec2bin(~parseInt(this.bitString, 2)))
+    this.changeToNewStringAt(
+      this.getRealBitSize(
+        this.dec2bin(~parseInt(this.bitString, 2)),
+        this.bitString
+      ),
+      0
     );
   }
 
   change(bit, pos) {
-    let listElem = this.getSaveFromList(pos);
+    let listElem = this.list[pos];
     listElem.bit = bit;
-    listElem.bitElem = (
-      <BitBox
-        key={listElem.key}
-        bit={listElem.bit}
-        active={listElem.active}
-      ></BitBox>
-    );
+    this.changeInListWithSaveCursor(bit, pos);
     this.changeInStringAt(bit, pos);
+  }
+
+  changeInListWithSaveCursor(bit, pos) {
+    if (this.cursorPos == pos) {
+      this.list[pos].bitElem = (
+        <BitBox
+          key={this.list[pos].key}
+          bit={bit}
+          active={this.list[pos].active}
+          cursorToLeft={this.cursorToLeft}
+        >
+          {this.cursorToLeft ? this.cursorBlank2 : this.cursor}
+        </BitBox>
+      );
+    } else {
+      this.list[pos].bitElem = (
+        <BitBox
+          key={this.list[pos].key}
+          bit={this.list[pos].bit}
+          active={this.list[pos].active}
+          cursorToLeft={this.cursorToLeft}
+        ></BitBox>
+      );
+    }
   }
 
   changeInStringAt(bit, pos) {
@@ -375,9 +400,9 @@ class BitList {
     return (dec >>> 0).toString(2);
   }
 
-  getRealBitSize(_bitString) {
+  getRealBitSize(_bitString, comparisonString) {
     return _bitString.substr(
-      _bitString.length - this.bitString.length,
+      _bitString.length - comparisonString.length,
       _bitString.length
     );
   }
@@ -387,12 +412,15 @@ class BitList {
       (this.byteList.length * 8 - this.list.length) / 8
     );
     if (unfinished > 0 && pos == this.byteList.length) {
-      return this.bitString.substr(0, this.bitString.length % 8);
+      return {
+        string: this.bitString.substr(0, this.bitString.length % 8),
+        startPos: 0,
+      };
     } else {
       const startPos =
         (this.bitString.length % 8) +
         (this.byteList.length - unfinished - pos) * 8;
-      return this.bitString.substr(startPos, 8);
+      return { string: this.bitString.substr(startPos, 8), startPos };
     }
   }
 }

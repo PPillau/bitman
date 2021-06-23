@@ -7,13 +7,13 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { numberWithCommas } from './utils';
 
 function App() {
-  const [list, setList] = React.useState(new BitList(''));
-  const [activeInput, setActiveInput] = React.useState(false);
-  const [value, setValue] = React.useState(0); // integer state
-
   function forceUpdate() {
     setValue(value + 1);
   }
+
+  const [list, setList] = React.useState(new BitList('', forceUpdate));
+  const [activeInput, setActiveInput] = React.useState(false);
+  const [value, setValue] = React.useState(0); // integer state
 
   const handleActiveInput = React.useCallback((e) => {
     setActiveInput(true);
@@ -91,10 +91,17 @@ function App() {
         </button>
 
         <CopyToClipboard text={list.bitString}>
-          <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 cursor-pointer rounded'>
+          <button className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'>
             Copy to clipboard
           </button>
         </CopyToClipboard>
+
+        <button
+          onClick={handleInvertClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+        >
+          Invert
+        </button>
       </div>
       <div
         className={classNames(
