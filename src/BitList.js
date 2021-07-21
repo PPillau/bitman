@@ -8,7 +8,7 @@ import ByteValueLabels from './components/ByteValueLabels';
 import ByteButtons from './components/ByteButtons';
 
 class BitList {
-  constructor(_bitString, _forceUpdate) {
+  constructor(_bitString) {
     this.bitString = '';
     this.list = [];
     this.byteList = [];
@@ -16,7 +16,6 @@ class BitList {
     this.byteButtonList = [];
     this.cursorPos = 0;
     this.indices = [];
-    this.forceUpdate = _forceUpdate;
 
     this.cursor = <span key='-1' className='cursor h-12'></span>;
     this.cursorBlank = (
@@ -106,9 +105,7 @@ class BitList {
         this.byteButtonList.splice(
           0,
           0,
-          <ByteButtons list={this} fu={this.forceUpdate}>
-            {i + 1}
-          </ByteButtons>
+          <ByteButtons list={this}>{i + 1}</ByteButtons>
         );
       }
     } else if (byteDiff > 0) {
@@ -298,6 +295,7 @@ class BitList {
     listElem.bit = bit;
     this.changeInListWithSaveCursor(bit, pos);
     this.changeInStringAt(bit, pos);
+    this.updateValueList();
   }
 
   changeInListWithSaveCursor(bit, pos) {

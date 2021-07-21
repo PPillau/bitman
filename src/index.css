@@ -145,3 +145,7 @@ body {
   grid-row-start: 5;
   grid-column-end: span 8;
 }
+
+#updater {
+  display: none;
+}

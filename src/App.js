@@ -1,19 +1,22 @@
 import './components/BitBox';
 import './App.css';
 import { BitList } from './BitList';
-import React from 'react';
+import React, { useRef } from 'react';
 import classNames from 'classnames';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { numberWithCommas } from './utils';
 
 function App() {
   function forceUpdate() {
-    setValue(value + 1);
+    setValue(stateRef.current + 1);
+    console.log(list, '-----------------------------------------');
   }
 
-  const [list, setList] = React.useState(new BitList('', forceUpdate));
+  const stateRef = useRef();
+  const [list, setList] = React.useState(new BitList(''));
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
+  stateRef.current = value;
 
   const handleActiveInput = React.useCallback((e) => {
     setActiveInput(true);
@@ -31,7 +34,6 @@ function App() {
   const handleInvertClick = React.useCallback(
     (e) => {
       list.invert();
-      console.log(list, '-----------------------------------------');
 
       forceUpdate();
     },
@@ -61,8 +63,6 @@ function App() {
   );
 
   React.useEffect(() => {
-    console.log(list, '-----------------------------------------');
-
     window.addEventListener('keydown', handleKeyInput);
 
     return () => {
@@ -70,8 +70,19 @@ function App() {
     };
   }, [handleKeyInput]);
 
+  React.useEffect(() => {
+    const observer = new MutationObserver(forceUpdate);
+    observer.observe(document.getElementById('updater'), {
+      characterData: false,
+      attributes: false,
+      childList: true,
+      subtree: false,
+    });
+  }, []);
+
   return (
     <div className='App'>
+      <div id='updater'>1</div>
       <div className='mb-4'>
         <span className='mr-6'>
           Hex: <span className='font-bold'>0x</span>
@@ -92,7 +103,7 @@ function App() {
 
         <CopyToClipboard text={list.bitString}>
           <button className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'>
-            Copy to clipboard
+            Copy all
           </button>
         </CopyToClipboard>
 

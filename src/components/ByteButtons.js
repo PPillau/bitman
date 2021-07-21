@@ -1,4 +1,4 @@
-export default function ByteButtons({ list, fu, children }) {
+export default function ByteButtons({ list, children }) {
   const handleByteClick = () => {
     navigator.clipboard.writeText(list.getByte(children).string);
   };
@@ -10,8 +10,8 @@ export default function ByteButtons({ list, fu, children }) {
       byte.string
     );
     list.changeToNewStringAt(invertedByte, byte.startPos);
-    console.log(invertedByte, '-----------------------------------------');
-    fu();
+    const target = document.getElementById('updater');
+    target.textContent = parseInt(target.textContent) + 1;
   };
 
   return (
