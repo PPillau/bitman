@@ -1,10 +1,10 @@
 export default function ByteButtons({ list, children }) {
   const handleByteClick = () => {
-    navigator.clipboard.writeText(list.getByte(children).string);
+    navigator.clipboard.writeText(list.getByte(children, true).string);
   };
 
   const handleInvertByteClick = () => {
-    const byte = list.getByte(children);
+    const byte = list.getByte(children, false);
     const invertedByte = list.getRealBitSize(
       list.dec2bin(~parseInt(byte.string, 2)),
       byte.string

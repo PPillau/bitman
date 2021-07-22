@@ -121,7 +121,7 @@ class BitList {
 
   updateValueList() {
     let unfinished_counter = Math.ceil(
-      (this.byteList.length * 8 - this.list.length) / 8
+      (this.byteList.length * 8 - this.getBitString(true).length) / 8
     );
     const unfinished = unfinished_counter;
     for (let i = 0; i < this.valueList.length; i++) {
@@ -129,9 +129,14 @@ class BitList {
         this.valueList[i] = <ByteValueLabels hex='-' dec='-'></ByteValueLabels>;
         unfinished_counter--;
       } else {
-        const startPos = (this.bitString.length % 8) + (i - unfinished) * 8;
-        const hexVal = this.getHexValue(this.bitString.substr(startPos, 8));
-        const decVal = this.getDecValue(this.bitString.substr(startPos, 8));
+        const startPos =
+          (this.getBitString(true).length % 8) + (i - unfinished) * 8;
+        const hexVal = this.getHexValue(
+          this.getBitString(true).substr(startPos, 8)
+        );
+        const decVal = this.getDecValue(
+          this.getBitString(true).substr(startPos, 8)
+        );
         this.valueList[i] = (
           <ByteValueLabels hex={hexVal} dec={decVal}></ByteValueLabels>
         );
@@ -180,9 +185,9 @@ class BitList {
 
   addToSting(bit, pos) {
     this.bitString =
-      this.bitString.substr(0, pos) +
+      this.getBitString(false).substr(0, pos) +
       bit +
-      this.bitString.substr(pos, this.bitString.length);
+      this.getBitString(false).substr(pos, this.getBitString(false).length);
   }
 
   deleteSaveFromList() {
@@ -212,8 +217,8 @@ class BitList {
 
   deleteFromSting(pos) {
     this.bitString =
-      this.bitString.substr(0, pos) +
-      this.bitString.substr(pos + 1, this.bitString.length);
+      this.getBitString(false).substr(0, pos) +
+      this.getBitString(false).substr(pos + 1, this.getBitString(false).length);
   }
 
   moveCursor(left) {
@@ -239,7 +244,7 @@ class BitList {
         this.cursorToLeft = true;
         this.addToList(false, null, 0, null, 0);
       }
-    } else if (!left && this.cursorPos + 1 < this.bitString.length) {
+    } else if (!left && this.cursorPos + 1 < this.getBitString(false).length) {
       this.list[this.cursorPos].bitElem = (
         <BitBox
           key={this.list[this.cursorPos].key}
@@ -284,8 +289,8 @@ class BitList {
   invert() {
     this.changeToNewStringAt(
       this.getRealBitSize(
-        this.dec2bin(~parseInt(this.bitString, 2)),
-        this.bitString
+        this.dec2bin(~parseInt(this.getBitString(false), 2)),
+        this.getBitString(false)
       ),
       0
     );
@@ -325,13 +330,35 @@ class BitList {
 
   changeInStringAt(bit, pos) {
     this.bitString =
-      this.bitString.substr(0, pos) +
+      this.getBitString(false).substr(0, pos) +
       bit +
-      this.bitString.substr(pos + 1, this.bitString.length);
+      this.getBitString(false).substr(pos + 1, this.getBitString(false).length);
   }
 
   changeFilling(_fillWith) {
     this.fillWith = _fillWith;
+    this.updateValueList();
+  }
+
+  getBitString(filled) {
+    const padWithFiller = (str, filler, span) => {
+      let result = str;
+      while (span > 0) {
+        result = filler + result;
+        span--;
+      }
+      return result;
+    };
+    if (filled) {
+      const span = 8 - (this.list.length % 8);
+      if (this.fillWith == '-1') {
+        return this.bitString;
+      } else {
+        return padWithFiller(this.bitString, this.fillWith, span);
+      }
+    } else {
+      return this.bitString;
+    }
   }
 
   renderFiller(bit) {
@@ -368,7 +395,7 @@ class BitList {
 
   renderBitNumbers() {
     let result = [];
-    for (let i = this.bitString.length; i > 0; i--) {
+    for (let i = this.getBitString(false).length; i > 0; i--) {
       result.push(<BitNumber key={i}>{i}</BitNumber>);
     }
     return [this.renderFiller(false), ...result];
@@ -398,20 +425,22 @@ class BitList {
     return result;
   }
 
-  getHexValue(input = this.bitString) {
+  getHexValue(input = this.getBitString(true)) {
     return this.getSafeOutput(parseInt(input, 2).toString(16));
   }
 
-  getDecValue(input = this.bitString) {
+  getDecValue(input = this.getBitString(true)) {
     return this.getSafeOutput(parseInt(input, 2).toString(10));
   }
 
   getUnicodeValue() {
-    return this.getSafeOutput(String.fromCharCode(parseInt(this.bitString, 2)));
+    return this.getSafeOutput(
+      String.fromCharCode(parseInt(this.getBitString(true), 2))
+    );
   }
 
   getSafeOutput(input) {
-    return this.bitString != '' ? input : '-';
+    return this.getBitString(false) != '' ? input : '-';
   }
 
   dec2bin(dec) {
@@ -425,20 +454,26 @@ class BitList {
     );
   }
 
-  getByte(pos) {
+  getByte(pos, withFiller) {
     const unfinished = Math.ceil(
-      (this.byteList.length * 8 - this.list.length) / 8
+      (this.byteList.length * 8 - this.getBitString(withFiller).length) / 8
     );
     if (unfinished > 0 && pos == this.byteList.length) {
       return {
-        string: this.bitString.substr(0, this.bitString.length % 8),
+        string: this.getBitString(withFiller).substr(
+          0,
+          this.getBitString(withFiller).length % 8
+        ),
         startPos: 0,
       };
     } else {
       const startPos =
-        (this.bitString.length % 8) +
+        (this.getBitString(withFiller).length % 8) +
         (this.byteList.length - unfinished - pos) * 8;
-      return { string: this.bitString.substr(startPos, 8), startPos };
+      return {
+        string: this.getBitString(withFiller).substr(startPos, 8),
+        startPos,
+      };
     }
   }
 }

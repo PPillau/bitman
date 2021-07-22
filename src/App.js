@@ -46,6 +46,7 @@ function App() {
     setFill(!fill);
     list.changeFilling(!fill ? fillWith : '-1');
     forceUpdate();
+    console.log(list.getBitString(true));
   });
 
   const handleFillWithChange = React.useCallback((e) => {
@@ -116,7 +117,7 @@ function App() {
           Clear
         </button>
 
-        <CopyToClipboard text={list.bitString}>
+        <CopyToClipboard text={list.getBitString(true)}>
           <button className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'>
             Copy all
           </button>
