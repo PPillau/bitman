@@ -149,3 +149,51 @@ body {
 #updater {
   display: none;
 }
+
+.fillerBox {
+  border: 1px solid grey;
+  display: inline-flex;
+  padding: 6px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.fillerBox input[type='checkbox'] {
+  margin-right: 10px;
+  height: 25px;
+  width: 25px;
+}
+
+.fillerBox input[type='checkbox']:before {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.fillerBox select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+
+  position: relative;
+  width: 40px;
+  height: 35px;
+  -moz-padding-start: calc(10px - 3px);
+  padding-left: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+
+  box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  margin-left: 10px;
+}
+
+.grey {
+  color: grey;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+}

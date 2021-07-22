@@ -9,11 +9,12 @@ import { numberWithCommas } from './utils';
 function App() {
   function forceUpdate() {
     setValue(stateRef.current + 1);
-    console.log(list, '-----------------------------------------');
   }
 
   const stateRef = useRef();
   const [list, setList] = React.useState(new BitList(''));
+  const [fill, setFill] = React.useState(false);
+  const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
   stateRef.current = value;
@@ -40,12 +41,26 @@ function App() {
     [list, value]
   );
 
+  const handleFillChange = React.useCallback((e) => {
+    const target = e.target;
+    setFill(!fill);
+    list.changeFilling(!fill ? fillWith : '-1');
+    forceUpdate();
+  });
+
+  const handleFillWithChange = React.useCallback((e) => {
+    const target = e.target;
+    setFillWith(e.target.value);
+    list.changeFilling(e.target.value);
+    forceUpdate();
+  });
+
   const handleKeyInput = React.useCallback(
     (e) => {
       const numRegex = new RegExp('^[01]$');
       if (activeInput) {
         if (numRegex.test(parseInt(e.key))) {
-          list.addSaveToList(true, e.key, false);
+          list.addSaveToList(true, e.key, 0);
         } else if (e.which == 39) {
           //right
           list.moveCursor(false);
@@ -83,7 +98,7 @@ function App() {
   return (
     <div className='App'>
       <div id='updater'>1</div>
-      <div className='mb-4'>
+      <div className='mb-4 controls'>
         <span className='mr-6'>
           Hex: <span className='font-bold'>0x</span>
           <span className='uppercase font-bold'>{list.getHexValue()}</span>
@@ -113,6 +128,23 @@ function App() {
         >
           Invert
         </button>
+        <div className={`fillerBox ${fill ? '' : 'grey'}`}>
+          <input
+            name='fill'
+            type='checkbox'
+            checked={fill}
+            onChange={handleFillChange}
+          />
+          Fill with:
+          <select
+            value={fillWith}
+            onChange={handleFillWithChange}
+            disabled={!fill}
+          >
+            <option value='0'>0</option>
+            <option value='1'>1</option>
+          </select>
+        </div>
       </div>
       <div
         className={classNames(
