@@ -9,10 +9,14 @@ import { numberWithCommas } from './utils';
 function App() {
   function forceUpdate() {
     setValue(stateRef.current + 1);
+    setDisplayValue('hex', list.getHexValue().toUpperCase());
+    setDisplayValue('dec', numberWithCommas(list.getDecValue()));
   }
 
   const stateRef = useRef();
   const [list, setList] = React.useState(new BitList(''));
+  const [hexVal, setHexVal] = React.useState('0x-');
+  const [decVal, setDecVal] = React.useState('-');
   const [fill, setFill] = React.useState(false);
   const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
@@ -42,11 +46,9 @@ function App() {
   );
 
   const handleFillChange = React.useCallback((e) => {
-    const target = e.target;
     setFill(!fill);
     list.changeFilling(!fill ? fillWith : '-1');
     forceUpdate();
-    console.log(list.getBitString(true));
   });
 
   const handleFillWithChange = React.useCallback((e) => {
@@ -55,6 +57,19 @@ function App() {
     list.changeFilling(e.target.value);
     forceUpdate();
   });
+
+  const handleValueChange = React.useCallback((e, target) => {});
+
+  const setDisplayValue = (target, val) => {
+    switch (target) {
+      case 'hex':
+        setHexVal('0x' + val);
+        break;
+      case 'dec':
+        setDecVal(val);
+        break;
+    }
+  };
 
   const handleKeyInput = React.useCallback(
     (e) => {
@@ -101,14 +116,22 @@ function App() {
       <div id='updater'>1</div>
       <div className='mb-4 controls'>
         <span className='mr-6'>
-          Hex: <span className='font-bold'>0x</span>
-          <span className='uppercase font-bold'>{list.getHexValue()}</span>
+          Hex:
+          <input
+            className='textbox_val font-bold'
+            type='text'
+            value={hexVal}
+            disabled
+          />
         </span>
         <span className='mr-6'>
           Decimal:{' '}
-          <span className='uppercase font-bold'>
-            {numberWithCommas(list.getDecValue())}
-          </span>
+          <input
+            className='uppercase textbox_val font-bold'
+            type='text'
+            value={decVal}
+            disabled
+          />
         </span>
         <button
           onClick={handleClearClick}
