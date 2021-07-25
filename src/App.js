@@ -18,6 +18,8 @@ function App() {
   const [hexVal, setHexVal] = React.useState('0x-');
   const [decVal, setDecVal] = React.useState('-');
   const [fill, setFill] = React.useState(false);
+  const [stickyCursor, setStickyCursor] = React.useState(false);
+  const [twosComplement, setTwosComplement] = React.useState(false);
   const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
@@ -45,6 +47,24 @@ function App() {
     [list, value]
   );
 
+  const handlePasteClick = React.useCallback(
+    (e) => {
+      list.invert();
+
+      forceUpdate();
+    },
+    [list, value]
+  );
+
+  const handlePasteAndClearClick = React.useCallback(
+    (e) => {
+      list.invert();
+
+      forceUpdate();
+    },
+    [list, value]
+  );
+
   const handleFillChange = React.useCallback((e) => {
     setFill(!fill);
     list.changeFilling(!fill ? fillWith : '-1');
@@ -58,7 +78,19 @@ function App() {
     forceUpdate();
   });
 
-  const handleValueChange = React.useCallback((e, target) => {});
+  const handleStickyCursorChange = React.useCallback((e) => {
+    const target = e.target;
+    setStickyCursor(!stickyCursor);
+  });
+
+  const handleTwosComplementChange = React.useCallback((e) => {
+    const target = e.target;
+    setTwosComplement(!twosComplement);
+  });
+
+  const handleValueChange = React.useCallback((e, target) => {
+    list.override(target, e.target.value);
+  });
 
   const setDisplayValue = (target, val) => {
     switch (target) {
@@ -125,7 +157,7 @@ function App() {
           />
         </span>
         <span className='mr-6'>
-          Decimal:{' '}
+          Dec:{' '}
           <input
             className='uppercase textbox_val font-bold'
             type='text'
@@ -133,6 +165,18 @@ function App() {
             disabled
           />
         </span>
+        <button
+          onClick={handlePasteClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+        >
+          Paste
+        </button>
+        <button
+          onClick={handlePasteAndClearClick}
+          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+        >
+          Clear & Paste
+        </button>
         <button
           onClick={handleClearClick}
           className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
@@ -152,7 +196,7 @@ function App() {
         >
           Invert
         </button>
-        <div className={`fillerBox ${fill ? '' : 'grey'}`}>
+        <div className={`fillerBox box ${fill ? '' : 'grey'}`}>
           <input
             name='fill'
             type='checkbox'
@@ -168,6 +212,24 @@ function App() {
             <option value='0'>0</option>
             <option value='1'>1</option>
           </select>
+        </div>
+        <div className={`fillerBox box ${stickyCursor ? '' : 'grey'}`}>
+          <input
+            name='fill'
+            type='checkbox'
+            checked={stickyCursor}
+            onChange={handleStickyCursorChange}
+          />
+          Sticky Cursor
+        </div>
+        <div className={`fillerBox box ${twosComplement ? '' : 'grey'}`}>
+          <input
+            name='fill'
+            type='checkbox'
+            checked={twosComplement}
+            onChange={handleTwosComplementChange}
+          />
+          Two's complement
         </div>
       </div>
       <div
