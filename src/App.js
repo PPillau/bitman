@@ -1,4 +1,3 @@
-import './App.css';
 import BitListBox from './components/BitListBox';
 
 function App() {
