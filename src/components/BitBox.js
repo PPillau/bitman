@@ -1,5 +1,4 @@
 import React from 'react';
-import classNames from 'classnames';
 
 export default function BitBox({ bit, color, children, cursorToLeft = false }) {
   const colorList = ['bg-blue-600', 'bg-gray-600', 'bg-green-600'];

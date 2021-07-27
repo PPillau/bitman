@@ -1,11 +1,10 @@
-import React from 'react';
-
 import BitBox from './components/BitBox';
 import BitNumber from './components/BitNumber';
-import ByteRuler from './components/ByteRuler';
-import Filler from './components/Filler';
-import ByteValueLabels from './components/ByteValueLabels';
 import ByteButtons from './components/ByteButtons';
+import ByteRuler from './components/ByteRuler';
+import ByteValueLabels from './components/ByteValueLabels';
+import Filler from './components/Filler';
+import React from 'react';
 
 class BasicBitList {
   constructor(_bitString, fillWith) {
@@ -30,7 +29,7 @@ class BasicBitList {
 
     let i = 0;
     this.addToList(false, null, 0, null, i);
-    if (_bitString != '') {
+    if (_bitString !== '') {
       for (; i < _bitString.length; i++) {
         this.addToList(true, _bitString.charAt(i), 0, i, i);
         this.indices.push(i);
@@ -54,7 +53,7 @@ class BasicBitList {
     if (_isBit) {
       let i = 0;
       for (; i < this.indices.length; i++) {
-        if (this.indices[i] != i) {
+        if (this.indices[i] !== i) {
           break;
         }
       }
@@ -146,7 +145,7 @@ class BasicBitList {
 
   deleteFromList(pos) {
     if (this.list[pos]) {
-      if (this.list[pos].bitElem != this.cursor) {
+      if (this.list[pos].bitElem !== this.cursor) {
         this.deleteFromSting(pos);
       }
       this.list.splice(pos, 1);
@@ -221,7 +220,7 @@ class BasicBitList {
     if (this.list[this.cursorPos].isBit) {
       this.deleteFromSting(this.cursorPos);
       this.indices.splice(
-        this.indices.findIndex((el) => el == this.list[this.cursorPos].key),
+        this.indices.findIndex((el) => el === this.list[this.cursorPos].key),
         1
       );
       this.list.splice(this.cursorPos, 1);
@@ -254,7 +253,7 @@ class BasicBitList {
   }
 
   changeInListWithSaveCursor(bit, pos) {
-    if (this.cursorPos == pos) {
+    if (this.cursorPos === pos) {
       this.list[pos].bitElem = (
         <BitBox
           key={this.list[pos].key}
@@ -300,7 +299,7 @@ class BasicBitList {
     };
     if (filled) {
       const span = 8 - (this.list.length % 8);
-      if (this.fillWith == '-1') {
+      if (this.fillWith === '-1') {
         return this.bitString;
       } else {
         return padWithFiller(this.bitString, this.fillWith, span);
@@ -324,7 +323,7 @@ class InteractiveBitList extends BasicBitList {
         );
         this.addToList(false, null, 0, null, this.cursorPos - 1);
         this.cursorPos--;
-      } else if (!this.cursorToLeft && this.cursorPos - 1 == -1) {
+      } else if (!this.cursorToLeft && this.cursorPos - 1 === -1) {
         this.list[this.cursorPos].bitElem = (
           <BitBox
             key={this.list[this.cursorPos].key}
@@ -368,7 +367,7 @@ class InteractiveBitList extends BasicBitList {
   }
 
   getSafeOutput(input) {
-    return this.getBitString(false) != '' ? input : '-';
+    return this.getBitString(false) !== '' ? input : '-';
   }
 
   dec2bin(dec) {
@@ -379,7 +378,7 @@ class InteractiveBitList extends BasicBitList {
     const unfinished = Math.ceil(
       (this.byteList.length * 8 - this.getBitString(withFiller).length) / 8
     );
-    if (unfinished > 0 && pos == this.byteList.length) {
+    if (unfinished > 0 && pos === this.byteList.length) {
       return {
         string: this.getBitString(withFiller).substr(
           0,
@@ -457,10 +456,10 @@ class BitList extends InteractiveBitList {
     const span = 8 - (this.list.length % 8);
 
     if (
-      this.list.length % 8 != 0 &&
-      !(this.list.length == 1 && !this.list[0].isBit)
+      this.list.length % 8 !== 0 &&
+      !(this.list.length === 1 && !this.list[0].isBit)
     ) {
-      if (this.fillWith != '-1' && bit) {
+      if (this.fillWith !== '-1' && bit) {
         const result = [];
         for (let i = 0; i < span; i++) {
           result.push(
