@@ -40,16 +40,31 @@ function BitListBox() {
     forceUpdate();
   }, [list, value]);
 
-  const handlePasteClick = React.useCallback(() => {
-    list.invert();
+  const checkClipBoardWithCallback = (callback) => {
+    navigator.clipboard.readText().then((clipText) => {
+      const numMultipleRegex = new RegExp('^[01]*$');
+      const clipboardText = parseInt(clipText);
+      console.log(clipText, '-----------------------------------------');
+      if (numMultipleRegex.test(clipboardText)) {
+        callback(clipboardText.toString());
+      }
 
-    forceUpdate();
+      forceUpdate();
+    });
+  };
+
+  const handlePasteClick = React.useCallback(() => {
+    const callback = (str) => {
+      list.paste(str);
+    };
+    checkClipBoardWithCallback(callback);
   }, [list, value]);
 
-  const handlePasteAndClearClick = React.useCallback(() => {
-    list.invert();
-
-    forceUpdate();
+  const handlePasteAndClearClick = React.useCallback(async () => {
+    const callback = (str) => {
+      list.clearAndPaste(str);
+    };
+    checkClipBoardWithCallback(callback);
   }, [list, value]);
 
   const handleFillChange = React.useCallback(() => {
@@ -90,7 +105,7 @@ function BitListBox() {
 
   const handleKeyInput = React.useCallback(
     (e) => {
-      const numRegex = new RegExp('^[01]$');
+      const numRegex = new RegExp('^[01]*$');
       if (activeInput) {
         if (numRegex.test(parseInt(e.key))) {
           list.addSaveToList(true, e.key, 0);

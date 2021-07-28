@@ -49,6 +49,12 @@ class BasicBitList {
     this.addToList(false, null, 0, null, 0);
   }
 
+  addMultipleSaveToList(arr) {
+    for (let i = 0; i < arr.length; i++) {
+      this.addSaveToList(arr[i].isBit, arr[i].bit, arr[i].color);
+    }
+  }
+
   addSaveToList(_isBit, _bit, _color) {
     if (_isBit) {
       let i = 0;
@@ -412,6 +418,19 @@ class InteractiveBitList extends BasicBitList {
       ),
       0
     );
+  }
+
+  paste(str) {
+    const arr = [];
+    for (let i = 0; i < str.length; i++) {
+      arr.push({ isBit: true, bit: str.charAt(i), color: 0 });
+    }
+    this.addMultipleSaveToList(arr);
+  }
+
+  clearAndPaste(str) {
+    this.clear();
+    this.paste(str);
   }
 }
 
