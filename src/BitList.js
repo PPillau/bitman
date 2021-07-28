@@ -7,7 +7,13 @@ import Filler from './components/Filler';
 import React from 'react';
 
 class BasicBitList {
-  constructor(_bitString, fillWith, _stickyCursor) {
+  constructor(
+    _bitString,
+    fillWith,
+    _stickyCursor,
+    _twosComplement,
+    _twosComplementRepresentation
+  ) {
     this.bitString = '';
     this.list = [];
     this.byteList = [];
@@ -16,6 +22,8 @@ class BasicBitList {
     this.cursorPos = 0;
     this.indices = [];
     this.fillWith = fillWith || '-1';
+    this.twosComplement = _twosComplement;
+    this.twosComplementRepresentation = _twosComplementRepresentation;
 
     this.cursor = <span key='-1' className='cursor h-12'></span>;
     this.cursorBlank = (
@@ -363,12 +371,24 @@ class InteractiveBitList extends BasicBitList {
     this.stickyCursor = _stickyCursor;
   }
 
+  changeTwosComplement(_twosComplement) {
+    this.twosComplement = _twosComplement;
+  }
+
+  changeTwosComplementRepresentation(_twosComplementRepresentation) {
+    this.twosComplementRepresentation = _twosComplementRepresentation;
+  }
+
   getHexValue(input = this.getBitString(true)) {
     return this.getSafeOutput(parseInt(input, 2).toString(16));
   }
 
   getDecValue(input = this.getBitString(true)) {
-    return this.getSafeOutput(parseInt(input, 2).toString(10));
+    if (this.twosComplement) {
+      return this.getSafeOutput(this.twosComplementToDec(input));
+    } else {
+      return this.getSafeOutput(parseInt(input, 2).toString(10));
+    }
   }
 
   getUnicodeValue() {
@@ -383,6 +403,20 @@ class InteractiveBitList extends BasicBitList {
 
   dec2bin(dec) {
     return (dec >>> 0).toString(2);
+  }
+
+  //https://stackoverflow.com/a/51205322
+  twosComplementToDec(binStr) {
+    if (!this.twosComplementRepresentation) {
+      binStr =
+        binStr.length >= 8 && binStr[0] === '1'
+          ? binStr.padStart(32, '1')
+          : binStr.padStart(32, '0');
+    } else {
+      binStr =
+        binStr[0] === '1' ? binStr.padStart(32, '1') : binStr.padStart(32, '0');
+    }
+    return parseInt(binStr, 2) >> 0;
   }
 
   getByte(pos, withFiller) {

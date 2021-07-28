@@ -16,12 +16,16 @@ function BitListBox() {
   const [hexVal, setHexVal] = React.useState('0x-');
   const [decVal, setDecVal] = React.useState('-');
   const [fill, setFill] = React.useState(false);
-  const [stickyCursor, setStickyCursor] = React.useState(false);
   const [twosComplement, setTwosComplement] = React.useState(false);
+  const [twosComplementRepresentation, setTwosComplementRepresentation] =
+    React.useState(false);
+  const [stickyCursor, setStickyCursor] = React.useState(false);
   const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
-  const [list] = React.useState(new BitList('', fill, stickyCursor));
+  const [list] = React.useState(
+    new BitList('', fill, stickyCursor, twosComplement)
+  );
   stateRef.current = value;
 
   const handleActiveInput = React.useCallback(() => {
@@ -43,8 +47,7 @@ function BitListBox() {
   const checkClipBoardWithCallback = (callback) => {
     navigator.clipboard.readText().then((clipText) => {
       const numMultipleRegex = new RegExp('^[01]*$');
-      const clipboardText = parseInt(clipText);
-      console.log(clipText, '-----------------------------------------');
+      const clipboardText = clipText;
       if (numMultipleRegex.test(clipboardText)) {
         callback(clipboardText.toString());
       }
@@ -80,13 +83,23 @@ function BitListBox() {
     forceUpdate();
   });
 
+  const handletwosComplementRepresentation = React.useCallback((e) => {
+    const target = e.target;
+    setTwosComplementRepresentation(target.value === 'true');
+    list.changeTwosComplementRepresentation(target.value === 'true');
+    forceUpdate();
+  });
+
   const handleStickyCursorChange = React.useCallback(() => {
     setStickyCursor(!stickyCursor);
     list.changeStickyCursor(!stickyCursor);
+    forceUpdate();
   });
 
   const handleTwosComplementChange = React.useCallback(() => {
     setTwosComplement(!twosComplement);
+    list.changeTwosComplement(!twosComplement);
+    forceUpdate();
   });
 
   //   const handleValueChange = React.useCallback((e, target) => {
@@ -223,14 +236,23 @@ function BitListBox() {
           />
           Sticky Cursor
         </div>
-        <div className={`fillerBox box ${twosComplement ? '' : 'grey'}`}>
+        <div className={`fillerBox box ${twosComplement ? '' : 'grey'} twos`}>
           <input
             name='fill'
             type='checkbox'
             checked={twosComplement}
             onChange={handleTwosComplementChange}
           />
-          Two's complement
+          2's complement in
+          <select
+            value={twosComplementRepresentation}
+            onChange={handletwosComplementRepresentation}
+            disabled={!twosComplement}
+          >
+            <option value={false}>8-bit</option>
+            <option value={true}>variable-length</option>
+          </select>
+          representation
         </div>
       </div>
       <div
