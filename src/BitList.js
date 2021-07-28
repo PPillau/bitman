@@ -7,7 +7,7 @@ import Filler from './components/Filler';
 import React from 'react';
 
 class BasicBitList {
-  constructor(_bitString, fillWith) {
+  constructor(_bitString, fillWith, _stickyCursor) {
     this.bitString = '';
     this.list = [];
     this.byteList = [];
@@ -24,6 +24,7 @@ class BasicBitList {
     this.cursorBlank2 = (
       <span key='-1' className='cursor cursor_left2 h-12'></span>
     );
+    this.stickyCursor = _stickyCursor;
     this.cursorToLeft = false;
     this.numRegex = new RegExp('^[01]$');
 
@@ -356,6 +357,10 @@ class InteractiveBitList extends BasicBitList {
         this.addToList(false, null, 0, null, 0);
       }
     }
+  }
+
+  changeStickyCursor(_stickyCursor) {
+    this.stickyCursor = _stickyCursor;
   }
 
   getHexValue(input = this.getBitString(true)) {

@@ -13,7 +13,6 @@ function BitListBox() {
   }
 
   const stateRef = useRef();
-  const [list] = React.useState(new BitList(''));
   const [hexVal, setHexVal] = React.useState('0x-');
   const [decVal, setDecVal] = React.useState('-');
   const [fill, setFill] = React.useState(false);
@@ -22,6 +21,7 @@ function BitListBox() {
   const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
+  const [list] = React.useState(new BitList('', fill, stickyCursor));
   stateRef.current = value;
 
   const handleActiveInput = React.useCallback(() => {
@@ -82,6 +82,7 @@ function BitListBox() {
 
   const handleStickyCursorChange = React.useCallback(() => {
     setStickyCursor(!stickyCursor);
+    list.changeStickyCursor(!stickyCursor);
   });
 
   const handleTwosComplementChange = React.useCallback(() => {
