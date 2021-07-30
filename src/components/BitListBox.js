@@ -16,15 +16,15 @@ function BitListBox() {
   const [hexVal, setHexVal] = React.useState('0x-');
   const [decVal, setDecVal] = React.useState('-');
   const [fill, setFill] = React.useState(false);
-  const [twosComplement, setTwosComplement] = React.useState(false);
-  const [twosComplementRepresentation, setTwosComplementRepresentation] =
+  const [complement, setComplement] = React.useState(false);
+  const [complementRepresentation, setComplementRepresentation] =
     React.useState(false);
   const [stickyCursor, setStickyCursor] = React.useState(false);
   const [fillWith, setFillWith] = React.useState('0');
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
   const [list] = React.useState(
-    new BitList('', fill, stickyCursor, twosComplement)
+    new BitList('', fill, stickyCursor, complement)
   );
   stateRef.current = value;
 
@@ -83,10 +83,10 @@ function BitListBox() {
     forceUpdate();
   });
 
-  const handletwosComplementRepresentation = React.useCallback((e) => {
+  const handleComplementRepresentation = React.useCallback((e) => {
     const target = e.target;
-    setTwosComplementRepresentation(target.value === 'true');
-    list.changeTwosComplementRepresentation(target.value === 'true');
+    setComplementRepresentation(target.value === 'true');
+    list.changeComplementRepresentation(target.value === 'true');
     forceUpdate();
   });
 
@@ -96,9 +96,9 @@ function BitListBox() {
     forceUpdate();
   });
 
-  const handleTwosComplementChange = React.useCallback(() => {
-    setTwosComplement(!twosComplement);
-    list.changeTwosComplement(!twosComplement);
+  const handleComplementChange = React.useCallback(() => {
+    setComplement(!complement);
+    list.changeComplement(!complement);
     forceUpdate();
   });
 
@@ -236,23 +236,22 @@ function BitListBox() {
           />
           Sticky Cursor
         </div>
-        <div className={`fillerBox box ${twosComplement ? '' : 'grey'} twos`}>
+        <div className={`fillerBox box ${complement ? '' : 'grey'} complement`}>
           <input
             name='fill'
             type='checkbox'
-            checked={twosComplement}
-            onChange={handleTwosComplementChange}
+            checked={complement}
+            onChange={handleComplementChange}
           />
-          2's complement in
           <select
-            value={twosComplementRepresentation}
-            onChange={handletwosComplementRepresentation}
-            disabled={!twosComplement}
+            value={complementRepresentation}
+            onChange={handleComplementRepresentation}
+            disabled={!complement}
           >
-            <option value={false}>8-bit</option>
-            <option value={true}>variable-length</option>
+            <option value={false}>Two's</option>
+            <option value={true}>One's</option>
           </select>
-          representation
+          complement
         </div>
       </div>
       <div

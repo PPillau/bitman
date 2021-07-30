@@ -11,8 +11,8 @@ class BasicBitList {
     _bitString,
     fillWith,
     _stickyCursor,
-    _twosComplement,
-    _twosComplementRepresentation
+    _complement,
+    _complementRepresentation
   ) {
     this.bitString = '';
     this.list = [];
@@ -22,8 +22,8 @@ class BasicBitList {
     this.cursorPos = 0;
     this.indices = [];
     this.fillWith = fillWith || '-1';
-    this.twosComplement = _twosComplement;
-    this.twosComplementRepresentation = _twosComplementRepresentation;
+    this.complement = _complement;
+    this.complementRepresentation = _complementRepresentation;
 
     this.cursor = <span key='-1' className='cursor h-12'></span>;
     this.cursorBlank = (
@@ -75,6 +75,8 @@ class BasicBitList {
       if (this.list[this.cursorPos].isBit) {
         this.list[this.cursorPos].bitElem = (
           <BitBox
+            listLength={this.getBitString}
+            index={this.list[this.cursorPos].key}
             key={this.list[this.cursorPos].key}
             bit={this.list[this.cursorPos].bit}
             color={this.list[this.cursorPos].color}
@@ -123,6 +125,8 @@ class BasicBitList {
       });
       this.list[pos].bitElem = (
         <BitBox
+          listLength={this.getBitString}
+          index={this.list[pos].key}
           key={this.list[pos].key}
           bit={this.list[pos].bit}
           color={this.list[pos].color}
@@ -134,6 +138,8 @@ class BasicBitList {
       if (this.list[pos]) {
         this.list[pos].bitElem = (
           <BitBox
+            listLength={this.getBitString}
+            index={this.list[pos].key}
             key={this.list[pos].key}
             bit={this.list[pos].bit}
             color={this.list[pos].color}
@@ -271,6 +277,8 @@ class BasicBitList {
     if (this.cursorPos === pos) {
       this.list[pos].bitElem = (
         <BitBox
+          listLength={this.getBitString}
+          index={this.list[pos].key}
           key={this.list[pos].key}
           bit={bit}
           color={this.list[pos].color}
@@ -282,6 +290,8 @@ class BasicBitList {
     } else {
       this.list[pos].bitElem = (
         <BitBox
+          listLength={this.getBitString}
+          index={this.list[pos].key}
           key={this.list[pos].key}
           bit={this.list[pos].bit}
           color={this.list[pos].color}
@@ -331,6 +341,8 @@ class InteractiveBitList extends BasicBitList {
       if (this.cursorPos - 1 >= 0) {
         this.list[this.cursorPos].bitElem = (
           <BitBox
+            listLength={this.getBitString}
+            index={this.list[this.cursorPos].key}
             key={this.list[this.cursorPos].key}
             bit={this.list[this.cursorPos].bit}
             color={this.list[this.cursorPos].color}
@@ -341,6 +353,8 @@ class InteractiveBitList extends BasicBitList {
       } else if (!this.cursorToLeft && this.cursorPos - 1 === -1) {
         this.list[this.cursorPos].bitElem = (
           <BitBox
+            listLength={this.getBitString}
+            index={this.list[this.cursorPos].key}
             key={this.list[this.cursorPos].key}
             bit={this.list[this.cursorPos].bit}
             color={this.list[this.cursorPos].color}
@@ -352,6 +366,8 @@ class InteractiveBitList extends BasicBitList {
     } else if (!left && this.cursorPos + 1 < this.getBitString(false).length) {
       this.list[this.cursorPos].bitElem = (
         <BitBox
+          listLength={this.getBitString}
+          index={this.list[this.cursorPos].key}
           key={this.list[this.cursorPos].key}
           bit={this.list[this.cursorPos].bit}
           color={this.list[this.cursorPos].color}
@@ -371,12 +387,12 @@ class InteractiveBitList extends BasicBitList {
     this.stickyCursor = _stickyCursor;
   }
 
-  changeTwosComplement(_twosComplement) {
-    this.twosComplement = _twosComplement;
+  changeComplement(_complement) {
+    this.complement = _complement;
   }
 
-  changeTwosComplementRepresentation(_twosComplementRepresentation) {
-    this.twosComplementRepresentation = _twosComplementRepresentation;
+  changeComplementRepresentation(_complementRepresentation) {
+    this.complementRepresentation = _complementRepresentation;
   }
 
   getHexValue(input = this.getBitString(true)) {
@@ -384,8 +400,8 @@ class InteractiveBitList extends BasicBitList {
   }
 
   getDecValue(input = this.getBitString(true)) {
-    if (this.twosComplement) {
-      return this.getSafeOutput(this.twosComplementToDec(input));
+    if (this.complement) {
+      return this.getSafeOutput(this.complementToDec(input));
     } else {
       return this.getSafeOutput(parseInt(input, 2).toString(10));
     }
@@ -406,17 +422,16 @@ class InteractiveBitList extends BasicBitList {
   }
 
   //https://stackoverflow.com/a/51205322
-  twosComplementToDec(binStr) {
-    if (!this.twosComplementRepresentation) {
+  complementToDec(binStr) {
+    if (!this.complementRepresentation) {
       binStr =
-        binStr.length >= 8 && binStr[0] === '1'
-          ? binStr.padStart(32, '1')
-          : binStr.padStart(32, '0');
+        binStr[0] === '1' ? binStr.padStart(32, '1') : binStr.padStart(32, '0');
+      return parseInt(binStr, 2) >> 0;
     } else {
       binStr =
         binStr[0] === '1' ? binStr.padStart(32, '1') : binStr.padStart(32, '0');
+      return (parseInt(binStr, 2) + 1) >> 0;
     }
-    return parseInt(binStr, 2) >> 0;
   }
 
   getByte(pos, withFiller) {
@@ -522,6 +537,8 @@ class BitList extends InteractiveBitList {
         for (let i = 0; i < span; i++) {
           result.push(
             <BitBox
+              listLength={this.getBitString}
+              index={-i - 1}
               key={-i - 1}
               bit={this.fillWith}
               color={1}
