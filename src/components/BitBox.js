@@ -10,20 +10,21 @@ export default function BitBox({
   cursorToLeft = false,
 }) {
   const colorList = ['bg-blue-600', 'bg-gray-600', 'bg-green-600'];
-  const [actualIndex, setActualIndex] = React.useState(index);
+  const [actualIndex] = React.useState(index);
+  console.log(listLength);
 
-  function rerender() {
-    setActualIndex(listLength(true).length - index);
-  }
+  // function rerender() {
+  //   setActualIndex(listLength(true).length - index);
+  // }
 
   React.useEffect(() => {
-    const observer = new MutationObserver(rerender);
-    observer.observe(document.getElementById('updater'), {
-      characterData: false,
-      attributes: false,
-      childList: true,
-      subtree: false,
-    });
+    // const observer = new MutationObserver(rerender);
+    // observer.observe(document.getElementById('updater'), {
+    //   characterData: false,
+    //   attributes: false,
+    //   childList: true,
+    //   subtree: false,
+    // });
   }, []);
 
   return (
@@ -43,7 +44,7 @@ export default function BitBox({
         getContent={() => {
           return (
             <span>
-              2<sup>{actualIndex}</sup> = {Math.pow(actualIndex, 2)}
+              2<sup>{actualIndex}</sup> = {Math.pow(2, actualIndex)}
             </span>
           );
         }}
