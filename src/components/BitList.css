@@ -1,0 +1,23 @@
+.bitlist {
+  display: flex;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid black;
+}
+
+.inner_box {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 100%;
+}
+
+.text_spacer,
+.text_spacer:focus {
+  width: 10px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 40px;
+  border: none;
+  outline: none;
+}

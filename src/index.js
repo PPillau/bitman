@@ -1,11 +1,8 @@
-import './index.css';
-import App from './App';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import App from "./App.js";
+import "./styles.css";
+
+const appRouting = <App />;
+
+ReactDOM.render(appRouting, document.getElementById("root"));

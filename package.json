@@ -2,33 +2,37 @@
   "name": "bitman",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "@craco/craco": "^6.1.2",
     "@hot-loader/react-dom": "^17.0.2",
-    "@testing-library/jest-dom": "^5.13.0",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3",
     "classnames": "^2.3.1",
+    "dragselect": "^2.3.0",
     "react": "^17.0.2",
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^17.0.2",
     "react-fontawesome": "^1.7.1",
     "react-hot-loader": "^4.13.0",
+    "react-router-dom": "^6.2.1",
     "react-scripts": "4.0.3",
-    "react-tooltip": "^4.2.21",
-    "web-vitals": "^1.1.2"
+    "react-tooltip": "^4.2.21"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject"
+    "start": "react-scripts start",
+    "build": "rm -rf dist && webpack --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "devDependencies": {
+    "css-loader": "^6.6.0",
+    "eslint": "^7.31.0",
+    "eslint-plugin-unused-imports": "^1.1.2",
+    "html-loader": "^3.1.0",
+    "style-loader": "^3.3.1"
   },
   "browserslist": {
     "production": [
@@ -41,13 +45,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "autoprefixer": "^9.8.6",
-    "craco-plugin-react-hot-reload": "^0.1.0",
-    "eslint": "^7.31.0",
-    "eslint-plugin-unused-imports": "^1.1.2",
-    "postcss": "^7.0.35",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.4"
   }
 }
