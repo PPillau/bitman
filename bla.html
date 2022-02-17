@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        display: flex;
+      }
+
+      input,
+      input:focus {
+        width: 10px;
+        height: 35px;
+        line-height: 35px;
+        font-size: 35px;
+        border: none;
+        outline: none;
+      }
+
+      .cell {
+        grid-column-end: span 1;
+        display: flex;
+        justify-content: center;
+      }
+
+      .bit {
+        grid-row-start: 1;
+        display: inline-flex;
+        justify-content: center;
+        position: relative;
+        font-weight: 800;
+        text-align: center;
+        --tw-text-opacity: 1;
+        color: rgba(255, 255, 255, var(--tw-text-opacity));
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        --tw-bg-opacity: 1;
+        background-color: rgba(37, 99, 235, var(--tw-bg-opacity));
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cell bit">1</div>
+    <input type="text" dir="rtl" />
+    <div class="cell bit">1</div>
+    <input type="text" dir="rtl" />
+    <div class="cell bit">1</div>
+    <input type="text" dir="rtl" />
+    <div class="cell bit">1</div>
+    <input type="text" dir="rtl" />
+    <div class="cell bit">1</div>
+    <input type="text" dir="rtl" />
+    <div class="cell bit">1</div>
+  </body>
+</html>
