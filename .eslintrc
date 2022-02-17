@@ -1,21 +1,29 @@
 {
-	"plugins": ["unused-imports"],
-    "rules": {
-		"no-unused-vars": 2, // or "@typescript-eslint/no-unused-vars": "off",
-		"unused-imports/no-unused-imports": "error",
-		"unused-imports/no-unused-vars": [
-			"warn",
-			{ "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
-		],
-		"no-duplicate-imports": 2,
-		"sort-imports": 2,
-		"no-var": 2,
-		"prefer-spread": 2,
-		"eqeqeq": 2,
-		"no-console": 1,
-		"no-extra-semi": 2,
-		"no-empty": 2,
-		"no-unreachable": 2,
-		"no-confusing-arrow": 2
-	}
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2020
+  },
+  "plugins": ["unused-imports"],
+  "rules": {
+    "no-unused-vars": 2, // or "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "no-duplicate-imports": 2,
+    "no-var": 2,
+    "prefer-spread": 2,
+    "eqeqeq": 2,
+    "no-console": 1,
+    "no-extra-semi": 2,
+    "no-empty": 2,
+    "no-unreachable": 2,
+    "no-confusing-arrow": 2
+  }
 }

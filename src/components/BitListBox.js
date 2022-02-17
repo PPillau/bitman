@@ -1,30 +1,36 @@
-import './BitListBox.css';
-import React, { useRef } from 'react';
-import { BitList } from '../BitList';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import classNames from 'classnames';
-import { numberWithCommas } from '../utils';
+import "./BitListBox.css";
+import React, { useRef, useDebugValue } from "react";
+import { BitList } from "../BitList";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import classNames from "classnames";
+import { numberWithCommas } from "../utils";
+
+function useStateWithLabel(initialValue, name) {
+  const [value, setValue] = React.useState(initialValue);
+  useDebugValue(`${name}: ${value}`);
+  return [value, setValue];
+}
 
 function BitListBox() {
   function forceUpdate() {
     setValue(stateRef.current + 1);
-    setDisplayValue('hex', list.getHexValue().toUpperCase());
-    setDisplayValue('dec', numberWithCommas(list.getDecValue()));
+    setDisplayValue("hex", list.getHexValue().toUpperCase());
+    setDisplayValue("dec", numberWithCommas(list.getDecValue()));
   }
 
   const stateRef = useRef();
-  const [hexVal, setHexVal] = React.useState('0x-');
-  const [decVal, setDecVal] = React.useState('-');
+  const [hexVal, setHexVal] = React.useState("0x-");
+  const [decVal, setDecVal] = useStateWithLabel("-", "decVal");
   const [fill, setFill] = React.useState(false);
   const [complement, setComplement] = React.useState(false);
   const [complementRepresentation, setComplementRepresentation] =
     React.useState(false);
   const [stickyCursor, setStickyCursor] = React.useState(false);
-  const [fillWith, setFillWith] = React.useState('0');
+  const [fillWith, setFillWith] = React.useState("0");
   const [activeInput, setActiveInput] = React.useState(false);
   const [value, setValue] = React.useState(0); // integer state
   const [list] = React.useState(
-    new BitList('', fill, stickyCursor, complement)
+    new BitList("", fill, stickyCursor, complement)
   );
   stateRef.current = value;
 
@@ -46,7 +52,7 @@ function BitListBox() {
 
   const checkClipBoardWithCallback = (callback) => {
     navigator.clipboard.readText().then((clipText) => {
-      const numMultipleRegex = new RegExp('^[01]*$');
+      const numMultipleRegex = new RegExp("^[01]*$");
       const clipboardText = clipText;
       if (numMultipleRegex.test(clipboardText)) {
         callback(clipboardText.toString());
@@ -72,7 +78,7 @@ function BitListBox() {
 
   const handleFillChange = React.useCallback(() => {
     setFill(!fill);
-    list.changeFilling(!fill ? fillWith : '-1');
+    list.changeFilling(!fill ? fillWith : "-1");
     forceUpdate();
   });
 
@@ -85,8 +91,8 @@ function BitListBox() {
 
   const handleComplementRepresentation = React.useCallback((e) => {
     const target = e.target;
-    setComplementRepresentation(target.value === 'true');
-    list.changeComplementRepresentation(target.value === 'true');
+    setComplementRepresentation(target.value === "true");
+    list.changeComplementRepresentation(target.value === "true");
     forceUpdate();
   });
 
@@ -108,10 +114,10 @@ function BitListBox() {
 
   const setDisplayValue = (target, val) => {
     switch (target) {
-      case 'hex':
-        setHexVal('0x' + val);
+      case "hex":
+        setHexVal("0x" + val);
         break;
-      case 'dec':
+      case "dec":
         setDecVal(val);
         break;
     }
@@ -119,7 +125,7 @@ function BitListBox() {
 
   const handleKeyInput = React.useCallback(
     (e) => {
-      const numRegex = new RegExp('^[01]*$');
+      const numRegex = new RegExp("^[01]*$");
       if (activeInput) {
         if (numRegex.test(parseInt(e.key))) {
           list.addSaveToList(true, e.key, 0);
@@ -132,7 +138,7 @@ function BitListBox() {
         } else if (e.which === 8) {
           list.deleteSaveFromList();
         }
-        console.log(list, '-----------------------------------------');
+        // console.log(list, '-----------------------------------------');
         forceUpdate();
       }
     },
@@ -140,16 +146,16 @@ function BitListBox() {
   );
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleKeyInput);
+    window.addEventListener("keydown", handleKeyInput);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyInput);
+      window.removeEventListener("keydown", handleKeyInput);
     };
   }, [handleKeyInput]);
 
   React.useEffect(() => {
     const observer = new MutationObserver(forceUpdate);
-    observer.observe(document.getElementById('updater'), {
+    observer.observe(document.getElementById("updater"), {
       characterData: false,
       attributes: false,
       childList: true,
@@ -158,62 +164,62 @@ function BitListBox() {
   }, []);
 
   return (
-    <div className='App'>
-      <div id='updater'>1</div>
-      <div className='mb-4 controls'>
-        <span className='mr-6'>
+    <div className="App">
+      <div id="updater">1</div>
+      <div className="mb-4 controls">
+        <span className="mr-6">
           Hex:
           <input
-            className='textbox_val font-bold'
-            type='text'
+            className="textbox_val font-bold"
+            type="text"
             value={hexVal}
             disabled
           />
         </span>
-        <span className='mr-6'>
-          Dec:{' '}
+        <span className="mr-6">
+          Dec:{" "}
           <input
-            className='uppercase textbox_val font-bold'
-            type='text'
+            className="uppercase textbox_val font-bold"
+            type="text"
             value={decVal}
             disabled
           />
         </span>
         <button
           onClick={handlePasteClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+          className="bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded"
         >
           Paste
         </button>
         <button
           onClick={handlePasteAndClearClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+          className="bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded"
         >
           Clear & Paste
         </button>
         <button
           onClick={handleClearClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+          className="bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded"
         >
           Clear
         </button>
 
         <CopyToClipboard text={list.getBitString(true)}>
-          <button className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'>
+          <button className="bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded">
             Copy all
           </button>
         </CopyToClipboard>
 
         <button
           onClick={handleInvertClick}
-          className='bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded'
+          className="bg-blue-500 hover:bg-blue-700 mr-2 text-white font-bold py-2 px-4 cursor-pointer rounded"
         >
           Invert
         </button>
-        <div className={`fillerBox box ${fill ? '' : 'grey'}`}>
+        <div className={`fillerBox box ${fill ? "" : "grey"}`}>
           <input
-            name='fill'
-            type='checkbox'
+            name="fill"
+            type="checkbox"
             checked={fill}
             onChange={handleFillChange}
           />
@@ -223,23 +229,23 @@ function BitListBox() {
             onChange={handleFillWithChange}
             disabled={!fill}
           >
-            <option value='0'>0</option>
-            <option value='1'>1</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
           </select>
         </div>
-        <div className={`fillerBox box ${stickyCursor ? '' : 'grey'}`}>
+        <div className={`fillerBox box ${stickyCursor ? "" : "grey"}`}>
           <input
-            name='fill'
-            type='checkbox'
+            name="fill"
+            type="checkbox"
             checked={stickyCursor}
             onChange={handleStickyCursorChange}
           />
           Sticky Cursor
         </div>
-        <div className={`fillerBox box ${complement ? '' : 'grey'} complement`}>
+        <div className={`fillerBox box ${complement ? "" : "grey"} complement`}>
           <input
-            name='fill'
-            type='checkbox'
+            name="fill"
+            type="checkbox"
             checked={complement}
             onChange={handleComplementChange}
           />
@@ -256,10 +262,10 @@ function BitListBox() {
       </div>
       <div
         className={classNames(
-          'bit_container border-2 p-1 flex justify-start items-center cursor-text',
+          "bit_container border-2 p-1 flex justify-start items-center cursor-text",
           {
-            'border-black': activeInput,
-            'border-grey-100': !activeInput,
+            "border-black": activeInput,
+            "border-grey-100": !activeInput,
           }
         )}
         onClick={handleActiveInput}
