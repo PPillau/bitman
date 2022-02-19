@@ -6,17 +6,19 @@
   font-weight: 800;
   text-align: center;
   --tw-text-opacity: 1;
-  color: rgba(255, 255, 255, var(--tw-text-opacity));
+  color: white;
   --tw-bg-opacity: 1;
-  background-color: rgba(37, 99, 235, var(--tw-bg-opacity));
+  background-color: #2563eb;
   height: 40px;
   width: 30px;
   border-radius: 5px;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+  grid-row-start: 1;
 }
 
 .ds-selected {
-  outline: 3px solid black;
-  outline-offset: 3px;
-  color: black;
-  font-weight: bold;
+  background-color: #f2de07;
 }
