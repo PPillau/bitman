@@ -181,9 +181,12 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     };
   };
 
+  const renderFillerBits = () => {};
+
   const renderBits = () => {
     let counter = 1,
-      cellCounter = -1;
+      cellCounter = -1,
+      bitCounter = refBitString.current.length - 1;
     const renderBitsResult = [];
 
     const firstInputElement = (
@@ -203,11 +206,12 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     bitString.split("").forEach((bit) => {
       if (["0", "1"].includes(bit)) {
         const bitElement = (
-          <Bit id={`bitElement_${counter}`} key={counter}>
+          <Bit id={`bitElement_${counter}`} key={counter} index={bitCounter}>
             {bit}
           </Bit>
         );
         counter++;
+        bitCounter--;
 
         const inputElement = (
           <input
@@ -254,13 +258,23 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     return renderBitsResult;
   };
 
+  const renderBitNumbers = () => {};
+  const renderByteRulers = () => {};
+  const renderByteValues = () => {};
+  const renderByteButtons = () => {};
+
   return (
     <div
       className="bitlist"
       id={`bitlist_area_${areaId}`}
       onClick={(e) => focusTextArea(e)}
     >
+      {renderFillerBits()}
       {renderBits()}
+      {renderBitNumbers()}
+      {renderByteRulers()}
+      {renderByteValues()}
+      {renderByteButtons()}
     </div>
   );
 };

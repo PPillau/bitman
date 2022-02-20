@@ -34,3 +34,25 @@
 .bit_cell_first {
   grid-column-end: span 6;
 }
+
+.filler7 {
+  grid-column-end: span 35;
+}
+.filler6 {
+  grid-column-end: span 30;
+}
+.filler5 {
+  grid-column-end: span 25;
+}
+.filler4 {
+  grid-column-end: span 20;
+}
+.filler3 {
+  grid-column-end: span 15;
+}
+.filler2 {
+  grid-column-end: span 10;
+}
+.filler1 {
+  grid-column-end: span 5;
+}
