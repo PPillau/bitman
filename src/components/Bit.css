@@ -8,7 +8,6 @@
   --tw-text-opacity: 1;
   color: white;
   --tw-bg-opacity: 1;
-  background-color: #2563eb;
   height: 40px;
   width: 30px;
   border-radius: 5px;
@@ -17,6 +16,14 @@
   -ms-user-select: none; /* IE10+/Edge */
   user-select: none; /* Standard */
   grid-row-start: 1;
+}
+
+.background_1 {
+  background-color: #2563eb;
+}
+
+.background_2 {
+  background-color: #8b8b8b;
 }
 
 .ds-selected {

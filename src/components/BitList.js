@@ -5,7 +5,7 @@ import Bit from "./Bit.js";
 import DragSelect from "dragselect";
 import classNames from "classnames/bind";
 
-const BitList = ({ areaId = 0, initialBitString }) => {
+const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState(initialBitString);
   const [dragSelector, setDragSelector, refDragSelector] = useState({});
@@ -181,7 +181,82 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     };
   };
 
-  const renderFillerBits = () => {};
+  const renderFillerBits = () => {
+    const fillAmount = 8 - (refBitString.current.length % 8);
+
+    if (fillWith !== "") {
+      let counter = refBitString.current.length * 2 - 1;
+      const renderFillerBitsResult = [];
+      if (fillAmount === 8) {
+        return;
+      }
+      for (let i = 0; i < fillAmount - 1; i++) {
+        const bitElem = (
+          <Bit id={`bitElement_${counter}`} key={counter} index={-1} type="2">
+            {fillWith}
+          </Bit>
+        );
+        counter++;
+        renderFillerBitsResult.push(
+          <div
+            key={counter}
+            className={classNames("cell", "bit_cell", "bit_cell_filler", {
+              bit_cell_filler_first: i === 0,
+            })}
+          >
+            {bitElem}
+          </div>
+        );
+        counter++;
+      }
+
+      const firstInputElement = (
+        <input
+          maxLength="0"
+          className="text_spacer"
+          type="text"
+          dir="rtl"
+          id={`bitElement_0`}
+          key={0}
+          onFocus={(e) => {
+            onFocusTextArea(e, 0);
+          }}
+        />
+      );
+
+      const bitElem = (
+        <Bit id={`bitElement_${counter}`} key={counter} index={-1} type="2">
+          {fillWith}
+        </Bit>
+      );
+      counter++;
+      renderFillerBitsResult.push(
+        <div
+          key={counter}
+          className={classNames(
+            "cell",
+            "bit_cell",
+            "bit_cell_filler",
+            {
+              bit_cell_filler_first: fillAmount === 1,
+            },
+            {
+              bit_cell_filler_single: fillAmount === 1,
+            }
+          )}
+        >
+          {bitElem}
+          {firstInputElement}
+        </div>
+      );
+
+      return renderFillerBitsResult;
+    }
+    if (fillAmount !== 8) {
+      return <div className={`bit_cell filler_${fillAmount}`}></div>;
+    }
+    return "";
+  };
 
   const renderBits = () => {
     let counter = 1,
@@ -206,7 +281,12 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     bitString.split("").forEach((bit) => {
       if (["0", "1"].includes(bit)) {
         const bitElement = (
-          <Bit id={`bitElement_${counter}`} key={counter} index={bitCounter}>
+          <Bit
+            id={`bitElement_${counter}`}
+            key={counter}
+            index={bitCounter}
+            type="1"
+          >
             {bit}
           </Bit>
         );
@@ -230,10 +310,16 @@ const BitList = ({ areaId = 0, initialBitString }) => {
           <div
             key={cellCounter}
             className={classNames("cell", "bit_cell", {
-              bit_cell_first: counter === 3,
+              bit_cell_first:
+                counter === 3 &&
+                (fillWith === "" ||
+                  8 - (refBitString.current.length % 8) === 8),
             })}
           >
-            {counter === 3 && firstInputElement}
+            {counter === 3 &&
+              (fillWith === "" ||
+                8 - (refBitString.current.length % 8) === 8) &&
+              firstInputElement}
             {bitElement}
             {inputElement}
           </div>
@@ -244,11 +330,12 @@ const BitList = ({ areaId = 0, initialBitString }) => {
 
     if (renderBitsResult.length === 0) {
       renderBitsResult.push(
-        <div key={cellCounter} className="cell bit_cell bit_cell_first">
+        <div key={cellCounter} className="cell bit_cell bit_cell_single">
           {firstInputElement}
         </div>
       );
     }
+
     if (refDragSelector.current.addSelectables) {
       refDragSelector.current.addSelectables(
         document.getElementsByClassName("selectable_bits")
@@ -258,8 +345,42 @@ const BitList = ({ areaId = 0, initialBitString }) => {
     return renderBitsResult;
   };
 
-  const renderBitNumbers = () => {};
-  const renderByteRulers = () => {};
+  const renderBitNumbers = () => {
+    const fillAmount = 8 - (refBitString.current.length % 8);
+    const renderBitNumbersResult = [];
+
+    if (fillAmount !== 8) {
+      renderBitNumbersResult.push(
+        <div className={`bit_number_cell filler_${fillAmount}`}></div>
+      );
+    }
+
+    let counter = refBitString.current.length;
+    refBitString.current.split("").forEach((bit) => {
+      renderBitNumbersResult.push(
+        <div className="cell bit_number_cell bit_number">{counter}</div>
+      );
+      counter--;
+    });
+
+    return renderBitNumbersResult;
+  };
+
+  const renderByteRulers = () => {
+    const renderByteRulersResult = [];
+    let counter = Math.ceil(refBitString.current.length / 8);
+
+    for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+      renderByteRulersResult.push(
+        <div className="cell byte_ruler byte_ruler_cell">
+          <span className="byte_label">Byte {counter}</span>
+        </div>
+      );
+      counter--;
+    }
+
+    return renderByteRulersResult;
+  };
   const renderByteValues = () => {};
   const renderByteButtons = () => {};
 
