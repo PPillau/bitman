@@ -5,7 +5,13 @@ import Bit from "./Bit.js";
 import DragSelect from "dragselect";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashCan, faCopy } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrashCan,
+  faCopy,
+  faRepeat,
+  faArrowRight,
+  faArrowLeft,
+} from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 
 const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
@@ -490,11 +496,11 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     return renderByteRulersResult;
   };
   const renderByteValues = () => {
-    const renderByteRulersResult = [];
+    const renderByteValuesResult = [];
     let counter = Math.ceil(refBitString.current.length / 8);
 
     for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
-      renderByteRulersResult.push(
+      renderByteValuesResult.push(
         <div className="cell byte_values byte_values_cell">
           <span className="byte_label">
             <div>
@@ -502,7 +508,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
               {getHexValue(getByte(counter - 1))}
             </div>
             <div>
-              <b>Dev: </b>
+              <b>Dec: </b>
               {getDecValue(getByte(counter - 1))}
             </div>
             <div>
@@ -515,9 +521,40 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
       counter--;
     }
 
-    return renderByteRulersResult;
+    return renderByteValuesResult;
   };
-  const renderByteButtons = () => {};
+  const renderByteButtons = () => {
+    const renderByteButtonsResult = [];
+    let counter = Math.ceil(refBitString.current.length / 8);
+
+    for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+      renderByteButtonsResult.push(
+        <div className="cell byte_buttons byte_buttons_cell">
+          <span className="byte_label">
+            {" "}
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faArrowLeft} />
+            </button>
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faCopy} />
+            </button>
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faRepeat} />
+            </button>
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </span>
+        </div>
+      );
+      counter--;
+    }
+
+    return renderByteButtonsResult;
+  };
 
   /* ----------------- END render methods ----------------- */
 
@@ -528,12 +565,19 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
       onClick={(e) => focusTextArea(e)}
     >
       <div className="button_area">
-        <button onClick={deleteAllFromList}>
-          <FontAwesomeIcon icon={faTrashCan} />
-        </button>
-        <button onClick={copyAllFromListToClipboard}>
-          <FontAwesomeIcon icon={faCopy} />
-        </button>
+        {bitString !== "" && (
+          <>
+            <button onClick={deleteAllFromList}>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+            <button onClick={copyAllFromListToClipboard}>
+              <FontAwesomeIcon icon={faCopy} />
+            </button>
+            <button onClick={console.log("")}>
+              <FontAwesomeIcon icon={faRepeat} />
+            </button>
+          </>
+        )}
       </div>
       <div className="bitbox">
         {renderFillerBits()}
