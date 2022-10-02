@@ -2,12 +2,34 @@
   margin: 10px;
   padding: 10px;
   border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+}
+
+.bitbox {
   display: grid;
   grid-auto-columns: 10px;
   grid-template-rows: repeat(4, 3rem);
   grid-column-gap: 0px;
   grid-row-gap: 0px;
   overflow-x: scroll;
+}
+
+.button_area {
+  height: 45px;
+  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.button_area button {
+  border: none;
+  background-color: rgb(36, 36, 36);
+  color: white;
+  padding: 15px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 .text_spacer,
@@ -42,6 +64,10 @@
 
 .byte_ruler_cell {
   grid-row-start: 3;
+}
+
+.byte_values_cell {
+  grid-row-start: 4;
 }
 
 .bit_cell_first {
@@ -109,7 +135,6 @@
 .byte_ruler {
   position: relative;
   z-index: 5;
-  grid-row-start: 3;
   grid-column-end: span 40;
   border-right: 1px solid black;
   border-left: 1px solid black;
@@ -144,4 +169,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 10px;
+}
+
+.byte_values {
+  position: relative;
+  z-index: 5;
+  grid-column-end: span 40;
 }
