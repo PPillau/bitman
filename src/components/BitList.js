@@ -22,7 +22,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   /* ----------------- START list management ----------------- */
 
-  /* ---- getter ---- */
+  /* ---- getters ---- */
   const getBitString = (filled) => {
     if (filled && fillWith !== "" && bitString.length > 0) {
       const fillAmount = 8 - (refBitString.current.length % 8);
@@ -37,13 +37,35 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     }
   };
 
+  const getByteStartPosition = useCallback(
+    (byteNumber) => {
+      const unfinished = bitString.length % 8;
+      const lateStart = unfinished > 0 ? -1 : 0;
+
+      return byteNumber === 0 ? 0 : unfinished + (byteNumber + lateStart) * 8;
+    },
+    [bitString]
+  );
+
+  const getByteEndPosition = (byteNumber) => {
+    const earlyEnd = getWrappedAroundUnfinished();
+
+    return earlyEnd + 8 * byteNumber;
+  };
+
+  const getWrappedAroundUnfinished = useCallback(() => {
+    const unfinished = bitString.length % 8;
+
+    return unfinished === 0 ? 8 : unfinished;
+  }, [bitString]);
+
   const getByte = (pos, withFiller = true) => {
     const actualBitString = getBitString(withFiller);
-    if (Math.ceil(actualBitString / 8) < pos) {
+    if (Math.ceil(actualBitString.length / 8) < pos) {
+      console.log("Hm");
       return "";
     }
 
-    const unfinished = bitString.length % 8;
     let cropStart = 0;
     let cropEnd = 0;
 
@@ -51,16 +73,15 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
       cropStart = pos * 8;
       cropEnd = (pos + 1) * 8;
     } else {
-      const lateStart = unfinished > 0 ? -1 : 0;
-      const earlyEnd = unfinished === 0 ? 8 : unfinished;
-      cropStart = pos === 0 ? 0 : unfinished + (pos + lateStart) * 8;
-      cropEnd = earlyEnd + 8 * pos;
+      cropStart = getByteStartPosition(pos);
+      cropEnd = getByteEndPosition(pos);
     }
 
+    console.log(pos, actualBitString.substring(cropStart, cropEnd));
     return actualBitString.substring(cropStart, cropEnd);
   };
 
-  /* ---- getter ---- */
+  /* ---- getters ---- */
 
   const moveCursorToEnd = useCallback(() => {
     moveCursor(refBitString.current.length * 2);
@@ -93,7 +114,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   const deleteMultipleFromList = useCallback(
     (selection) => {
-      console.log(selection);
       const selectionDirectionObject = findOutSelectionDirection(selection);
       if (selectionDirectionObject.direction) {
         const cropStart = Math.ceil(selectionDirectionObject.first / 2 - 1);
@@ -136,6 +156,24 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     [setBitString]
   );
 
+  const changeToNewStringAt = useCallback(
+    (newBitString, pos) => {
+      let bit = "";
+      let resultingBitString = bitString;
+
+      resultingBitString =
+        resultingBitString.substr(0, pos) +
+        newBitString +
+        resultingBitString.substr(
+          pos + newBitString.length,
+          getBitString(false).length
+        );
+
+      setBitString(resultingBitString);
+    },
+    [bitString, setBitString]
+  );
+
   /* ----------------- END list management ----------------- */
 
   /* ----------------- START UI callbacks ----------------- */
@@ -143,6 +181,11 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   const copyAllFromListToClipboard = useCallback(() => {
     navigator.clipboard.writeText(getBitString(true));
   }, [bitString]);
+
+  const copyByteToClipboad = (byteNumber) => {
+    console.log(byteNumber);
+    navigator.clipboard.writeText(getByte(byteNumber));
+  };
 
   /* ----------------- END UI callbacks ----------------- */
 
@@ -210,7 +253,14 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   /* ----------------- START helper methods ----------------- */
 
+  const dec2bin = (dec) => {
+    return (dec >>> 0).toString(2);
+  };
+
   const getHexValue = (input = getBitString(true)) => {
+    if (input === "") {
+      console.log("a");
+    }
     return getSafeOutput(parseInt(input, 2).toString(16));
   };
 
@@ -224,6 +274,23 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   const getSafeOutput = (input) => {
     return getBitString(false) !== "" ? input : "-";
+  };
+
+  const getRealBitSize = (_bitString, comparisonString) => {
+    return _bitString.substr(
+      _bitString.length - comparisonString.length,
+      _bitString.length
+    );
+  };
+
+  const invert = (pos, amount) => {
+    changeToNewStringAt(
+      getRealBitSize(
+        dec2bin(~parseInt(getBitString(false).substring(pos, pos + amount), 2)),
+        getBitString(false).substring(pos, pos + amount)
+      ),
+      pos
+    );
   };
 
   /* ----------------- END helper methods ----------------- */
@@ -500,20 +567,24 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     let counter = Math.ceil(refBitString.current.length / 8);
 
     for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+      let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
+
       renderByteValuesResult.push(
         <div className="cell byte_values byte_values_cell">
           <span className="byte_label">
             <div>
               <b>Hex: </b>
-              {getHexValue(getByte(counter - 1))}
+              <span className="hex_val">
+                {getHexValue(getByte(byteNumber))}
+              </span>
             </div>
             <div>
               <b>Dec: </b>
-              {getDecValue(getByte(counter - 1))}
+              {getDecValue(getByte(byteNumber))}
             </div>
             <div>
               <b>Oct: </b>
-              {getOctValue(getByte(counter - 1))}
+              {getOctValue(getByte(byteNumber))}
             </div>
           </span>
         </div>
@@ -528,23 +599,32 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     let counter = Math.ceil(refBitString.current.length / 8);
 
     for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+      let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
+
       renderByteButtonsResult.push(
         <div className="cell byte_buttons byte_buttons_cell">
           <span className="byte_label">
             {" "}
-            <button onClick={console.log("")}>
+            <button onClick={() => console.log("")}>
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
-            <button onClick={console.log("")}>
+            <button onClick={() => console.log("")}>
               <FontAwesomeIcon icon={faTrashCan} />
             </button>
-            <button onClick={console.log("")}>
+            <button onClick={() => copyByteToClipboad(byteNumber)}>
               <FontAwesomeIcon icon={faCopy} />
             </button>
-            <button onClick={console.log("")}>
+            <button
+              onClick={() =>
+                invert(
+                  getByteStartPosition(byteNumber),
+                  getByteEndPosition(byteNumber)
+                )
+              }
+            >
               <FontAwesomeIcon icon={faRepeat} />
             </button>
-            <button onClick={console.log("")}>
+            <button onClick={() => console.log("")}>
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
           </span>
@@ -573,7 +653,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             <button onClick={copyAllFromListToClipboard}>
               <FontAwesomeIcon icon={faCopy} />
             </button>
-            <button onClick={console.log("")}>
+            <button onClick={() => invert(0, bitString.length)}>
               <FontAwesomeIcon icon={faRepeat} />
             </button>
           </>
