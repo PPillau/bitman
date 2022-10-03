@@ -62,7 +62,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   const getByte = (pos, withFiller = true) => {
     const actualBitString = getBitString(withFiller);
     if (Math.ceil(actualBitString.length / 8) < pos) {
-      console.log("Hm");
       return "";
     }
 
@@ -77,7 +76,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
       cropEnd = getByteEndPosition(pos);
     }
 
-    console.log(pos, actualBitString.substring(cropStart, cropEnd));
     return actualBitString.substring(cropStart, cropEnd);
   };
 
@@ -183,7 +181,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   }, [bitString]);
 
   const copyByteToClipboad = (byteNumber) => {
-    console.log(byteNumber);
     navigator.clipboard.writeText(getByte(byteNumber));
   };
 
@@ -258,9 +255,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   };
 
   const getHexValue = (input = getBitString(true)) => {
-    if (input === "") {
-      console.log("a");
-    }
     return getSafeOutput(parseInt(input, 2).toString(16));
   };
 
