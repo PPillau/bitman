@@ -22,7 +22,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   /* ----------------- START list management ----------------- */
 
-  /* ---- getters ---- */
+  /* --- START getters --- */
   const getBitString = (filled) => {
     if (filled && fillWith !== "" && bitString.length > 0) {
       const fillAmount = 8 - (refBitString.current.length % 8);
@@ -79,7 +79,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     return actualBitString.substring(cropStart, cropEnd);
   };
 
-  /* ---- getters ---- */
+  /* --- END getters --- */
 
   const moveCursorToEnd = useCallback(() => {
     moveCursor(refBitString.current.length * 2);
@@ -141,6 +141,21 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     moveCursor(0);
   }, [setBitString, setCursorPosition]);
 
+  const deleteFromListAt = useCallback(
+    (start, end) => {
+      let resultingBitString = bitString;
+
+      resultingBitString =
+        resultingBitString.substr(0, start) +
+        resultingBitString.substr(end, getBitString(false).length);
+
+      setBitString(resultingBitString);
+      setCursorPosition(0);
+      moveCursor(0);
+    },
+    [bitString, setBitString, setCursorPosition]
+  );
+
   const addToList = useCallback(
     (pos, key) => {
       setBitString(
@@ -156,7 +171,6 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
 
   const changeToNewStringAt = useCallback(
     (newBitString, pos) => {
-      let bit = "";
       let resultingBitString = bitString;
 
       resultingBitString =
@@ -285,6 +299,23 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
       ),
       pos
     );
+  };
+
+  const byteInvert = (start, end) => {
+    const amount = end - start;
+    if (amount > 0) {
+      invert(start, amount);
+    }
+  };
+
+  const canByteMove = (byteNumber, direction) => {
+    if (direction && byteNumber === 0) {
+      return false;
+    } else if (!direction && getBitString(true).length / 8 === byteNumber + 1) {
+      return false;
+    } else {
+      return true;
+    }
   };
 
   /* ----------------- END helper methods ----------------- */
@@ -599,10 +630,20 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
         <div className="cell byte_buttons byte_buttons_cell">
           <span className="byte_label">
             {" "}
-            <button onClick={() => console.log("")}>
+            <button
+              onClick={() => console.log("")}
+              disabled={!canByteMove(byteNumber, true)}
+            >
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
-            <button onClick={() => console.log("")}>
+            <button
+              onClick={() =>
+                deleteFromListAt(
+                  getByteStartPosition(byteNumber),
+                  getByteEndPosition(byteNumber)
+                )
+              }
+            >
               <FontAwesomeIcon icon={faTrashCan} />
             </button>
             <button onClick={() => copyByteToClipboad(byteNumber)}>
@@ -610,7 +651,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             </button>
             <button
               onClick={() =>
-                invert(
+                byteInvert(
                   getByteStartPosition(byteNumber),
                   getByteEndPosition(byteNumber)
                 )
@@ -618,7 +659,10 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             >
               <FontAwesomeIcon icon={faRepeat} />
             </button>
-            <button onClick={() => console.log("")}>
+            <button
+              onClick={() => console.log("")}
+              disabled={!canByteMove(byteNumber, false)}
+            >
               <FontAwesomeIcon icon={faArrowRight} />
             </button>
           </span>

@@ -201,3 +201,8 @@
   border-radius: 5px;
   cursor: pointer;
 }
+
+.byte_buttons button:disabled {
+  background-color: rgb(190, 190, 190);
+  cursor: not-allowed;
+}
