@@ -12,6 +12,7 @@ import {
   faArrowRight,
   faArrowLeft,
   faArrowsLeftRightToLine,
+  faICursor,
 } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import Dropdown from "react-dropdown";
@@ -22,6 +23,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   const [dragSelector, setDragSelector, refDragSelector] = useState({});
   const [selection, setSelection] = useState([]);
 
+  const [stickyCursor, setStickyCursor] = useState(false);
   const [fill, setFill] = useState(false);
   const [fillWith, setFillWith] = useState(filler);
 
@@ -168,10 +170,13 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
           key +
           refBitString.current.substr(pos)
       );
-      moveCursorForwards();
+
+      if (!stickyCursor) {
+        moveCursorForwards();
+      }
       refDragSelector.current.clearSelection();
     },
-    [setBitString]
+    [setBitString, stickyCursor]
   );
 
   const changeToNewStringAt = useCallback(
@@ -254,7 +259,11 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   const handleFillChange = useCallback(() => {
     setFill(!fill);
-  });
+  }, [setFill, fill]);
+
+  const handleStickyCursorChange = useCallback(() => {
+    setStickyCursor(!stickyCursor);
+  }, [setStickyCursor, stickyCursor]);
 
   const handleFillWithChange = useCallback(
     (option) => {
@@ -268,38 +277,41 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   /* ----------------- START use effects & management ----------------- */
 
-  const handleKeyInput = useCallback((e) => {
-    const numRegex = new RegExp("^[01]*$");
-    if (numRegex.test(parseInt(e.key))) {
-      //'0' or '1' on keyboard
-      addToList(refCursorPosition.current / 2, parseInt(e.key));
-    } else if (e.which === 39) {
-      //right arrow key
-      moveCursorForwards();
-    } else if (e.which === 37) {
-      //left arrow key
-      moveCursorBackwards();
-    } else if (e.which === 8) {
-      //Backspace key ("<---" key)
-      if (refDragSelector.current.getSelection().length > 0) {
-        //if selection exists delete selection
-        deleteMultipleFromList(refDragSelector.current.getSelection());
-      } else {
-        //if no selection exists delete bit left of current cursor
-        deleteSingleFromList(refCursorPosition.current / 2);
+  const handleKeyInput = useCallback(
+    (e) => {
+      const numRegex = new RegExp("^[01]*$");
+      if (numRegex.test(parseInt(e.key))) {
+        //'0' or '1' on keyboard
+        addToList(refCursorPosition.current / 2, parseInt(e.key));
+      } else if (e.which === 39) {
+        //right arrow key
+        moveCursorForwards();
+      } else if (e.which === 37) {
+        //left arrow key
         moveCursorBackwards();
+      } else if (e.which === 8) {
+        //Backspace key ("<---" key)
+        if (refDragSelector.current.getSelection().length > 0) {
+          //if selection exists delete selection
+          deleteMultipleFromList(refDragSelector.current.getSelection());
+        } else {
+          //if no selection exists delete bit left of current cursor
+          deleteSingleFromList(refCursorPosition.current / 2);
+          moveCursorBackwards();
+        }
+      } else if (e.which === 46) {
+        //delete key ("Entf" key)
+        if (refDragSelector.current.getSelection().length > 0) {
+          //if selection exists delete selection
+          deleteMultipleFromList(refDragSelector.current.getSelection());
+        } else {
+          //if no selection exists delete bit right of current cursor
+          deleteSingleFromList((refCursorPosition.current + 2) / 2);
+        }
       }
-    } else if (e.which === 46) {
-      //delete key ("Entf" key)
-      if (refDragSelector.current.getSelection().length > 0) {
-        //if selection exists delete selection
-        deleteMultipleFromList(refDragSelector.current.getSelection());
-      } else {
-        //if no selection exists delete bit right of current cursor
-        deleteSingleFromList((refCursorPosition.current + 2) / 2);
-      }
-    }
-  }, []);
+    },
+    [stickyCursor]
+  );
 
   //Initializer
   useEffect(() => {
@@ -793,7 +805,17 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
                 className="dropdown"
                 controlClassName="dropdown_control"
                 menuClassName="dropdown_menu"
+                placeholderClassName="dropdown_placeholder"
               ></Dropdown>
+            </div>
+            <div className={`fillerBox box `}>
+              <FontAwesomeIcon icon={faICursor} />
+              <input
+                name="sticky"
+                type="checkbox"
+                checked={stickyCursor}
+                onChange={handleStickyCursorChange}
+              />
             </div>
           </>
         )}

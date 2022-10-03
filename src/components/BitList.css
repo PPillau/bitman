@@ -1,5 +1,5 @@
 .bitlist {
-  margin: 10px;
+  margin: 15px;
   padding: 10px;
   border: 1px solid black;
   display: flex;
@@ -229,11 +229,13 @@
   background-color: rgb(36, 36, 36);
   border-radius: 5px;
   color: white;
+  z-index: 10;
 }
 
 .fillerBox input[type="checkbox"] {
   height: 25px;
   width: 25px;
+  cursor: pointer;
 }
 
 .fillerBox input[type="checkbox"]:before {
@@ -254,12 +256,24 @@
 
   box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.3);
   border-radius: 3px;
+  color: black;
+  cursor: pointer;
 }
 
 .dropdown_control {
+  background-color: #b9b9b9;
 }
 
 .dropdown_menu {
   background-color: white;
   color: black;
+  padding: 10px;
+}
+
+.dropdown_menu div {
+  /* margin-bottom: 5px; */
+}
+
+.dropdown_placeholder {
+  padding-left: 10px;
 }
