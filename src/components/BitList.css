@@ -120,6 +120,10 @@
   padding-top: 10px;
   grid-column-end: span 5;
   padding-left: 7px;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
 }
 
 .bit_number:before {
@@ -142,6 +146,10 @@
   grid-column-end: span 40;
   border-right: 1px solid black;
   border-left: 1px solid black;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
 }
 
 .value_labels {

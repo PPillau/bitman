@@ -186,6 +186,55 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     [bitString, setBitString]
   );
 
+  const moveByte = useCallback((byteNumber, direction, e = null) => {
+    if (e !== null) {
+      e.stopPropagation();
+    }
+
+    let resultingBitString = bitString;
+    const byteDirection = direction ? -1 : 1;
+
+    const movedByte = getByte(byteNumber);
+    const replacementByte = getByte(byteNumber + byteDirection);
+
+    const movedByteStartPosition = getByteStartPosition(byteNumber);
+    const movedByteEndPosition = getByteEndPosition(byteNumber);
+    const replacementByteStartPosition = getByteStartPosition(
+      byteNumber + byteDirection
+    );
+    const replacementdByteEndPosition = getByteEndPosition(
+      byteNumber + byteDirection
+    );
+
+    if (direction) {
+      //move left
+
+      resultingBitString =
+        resultingBitString.substr(0, replacementByteStartPosition) +
+        movedByte +
+        replacementByte +
+        resultingBitString.substr(
+          replacementByteStartPosition +
+            movedByte.length +
+            replacementByte.length,
+          resultingBitString.length
+        );
+    } else {
+      //move right
+
+      resultingBitString =
+        resultingBitString.substr(0, movedByteStartPosition) +
+        replacementByte +
+        movedByte +
+        resultingBitString.substr(
+          replacementdByteEndPosition,
+          resultingBitString.length
+        );
+    }
+
+    setBitString(resultingBitString);
+  });
+
   /* ----------------- END list management ----------------- */
 
   /* ----------------- START UI callbacks ----------------- */
@@ -631,7 +680,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
           <span className="byte_label">
             {" "}
             <button
-              onClick={() => console.log("")}
+              onClick={(e) => moveByte(byteNumber, true, e)}
               disabled={!canByteMove(byteNumber, true)}
             >
               <FontAwesomeIcon icon={faArrowLeft} />
@@ -660,7 +709,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
               <FontAwesomeIcon icon={faRepeat} />
             </button>
             <button
-              onClick={() => console.log("")}
+              onClick={(e) => moveByte(byteNumber, false, e)}
               disabled={!canByteMove(byteNumber, false)}
             >
               <FontAwesomeIcon icon={faArrowRight} />
