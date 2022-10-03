@@ -11,14 +11,19 @@ import {
   faRepeat,
   faArrowRight,
   faArrowLeft,
+  faArrowsLeftRightToLine,
 } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
+import Dropdown from "react-dropdown";
 
-const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
+const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState(initialBitString);
   const [dragSelector, setDragSelector, refDragSelector] = useState({});
   const [selection, setSelection] = useState([]);
+
+  const [fill, setFill] = useState(false);
+  const [fillWith, setFillWith] = useState(filler);
 
   /* ----------------- START list management ----------------- */
 
@@ -247,6 +252,18 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     navigator.clipboard.writeText(getByte(byteNumber));
   };
 
+  const handleFillChange = useCallback(() => {
+    setFill(!fill);
+  });
+
+  const handleFillWithChange = useCallback(
+    (option) => {
+      console.log(option.value);
+      setFillWith(option.value);
+    },
+    [setFillWith]
+  );
+
   /* ----------------- END UI callbacks ----------------- */
 
   /* ----------------- START use effects & management ----------------- */
@@ -317,15 +334,24 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     return (dec >>> 0).toString(2);
   };
 
-  const getHexValue = (input = getBitString(true)) => {
+  const getHexValue = (input = getBitString(true), shouldFill) => {
+    if (!shouldFill && input.length !== 8) {
+      return "-";
+    }
     return getSafeOutput(parseInt(input, 2).toString(16));
   };
 
-  const getOctValue = (input = getBitString(true)) => {
+  const getOctValue = (input = getBitString(true), shouldFill) => {
+    if (!shouldFill && input.length !== 8) {
+      return "-";
+    }
     return getSafeOutput(parseInt(input, 2).toString(8));
   };
 
-  const getDecValue = (input = getBitString(true)) => {
+  const getDecValue = (input = getBitString(true), shouldFill) => {
+    if (!shouldFill && input.length !== 8) {
+      return "-";
+    }
     return getSafeOutput(parseInt(input, 2).toString(10));
   };
 
@@ -358,9 +384,18 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   };
 
   const canByteMove = (byteNumber, direction) => {
-    if (direction && byteNumber === 0) {
+    const unfinished = getBitString(false).length % 8;
+
+    if (
+      direction &&
+      (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0))
+    ) {
       return false;
-    } else if (!direction && getBitString(true).length / 8 === byteNumber + 1) {
+    } else if (
+      !direction &&
+      (getBitString(true).length / 8 === byteNumber + 1 ||
+        (byteNumber === 0 && !fill && unfinished > 0))
+    ) {
       return false;
     } else {
       return true;
@@ -435,7 +470,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
   const renderFillerBits = () => {
     const fillAmount = 8 - (refBitString.current.length % 8);
 
-    if (fillWith !== "") {
+    if (fillWith !== "" && fill) {
       let counter = refBitString.current.length * 2 - 1;
       const renderFillerBitsResult = [];
 
@@ -522,7 +557,7 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
     const firstInputElement = (
       <input
         maxLength="0"
-        className="text_spacer"
+        className="text_spacer first"
         type="text"
         dir="rtl"
         id={`bitElement_0`}
@@ -567,13 +602,11 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             className={classNames("cell", "bit_cell", {
               bit_cell_first:
                 counter === 3 &&
-                (fillWith === "" ||
-                  8 - (refBitString.current.length % 8) === 8),
+                (!fill || 8 - (refBitString.current.length % 8) === 8),
             })}
           >
             {counter === 3 &&
-              (fillWith === "" ||
-                8 - (refBitString.current.length % 8) === 8) &&
+              (!fill || 8 - (refBitString.current.length % 8) === 8) &&
               firstInputElement}
             {bitElement}
             {inputElement}
@@ -649,16 +682,16 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             <div>
               <b>Hex: </b>
               <span className="hex_val">
-                {getHexValue(getByte(byteNumber))}
+                {getHexValue(getByte(byteNumber, fill), fill)}
               </span>
             </div>
             <div>
               <b>Dec: </b>
-              {getDecValue(getByte(byteNumber))}
+              {getDecValue(getByte(byteNumber, fill), fill)}
             </div>
             <div>
               <b>Oct: </b>
-              {getOctValue(getByte(byteNumber))}
+              {getOctValue(getByte(byteNumber, fill), fill)}
             </div>
           </span>
         </div>
@@ -743,10 +776,29 @@ const BitList = ({ areaId = 0, initialBitString, fillWith = "0" }) => {
             <button onClick={() => invert(0, bitString.length)}>
               <FontAwesomeIcon icon={faRepeat} />
             </button>
+            <div className={`fillerBox box ${fill ? "" : "grey"}`}>
+              <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
+
+              <input
+                name="fill"
+                type="checkbox"
+                checked={fill}
+                onChange={handleFillChange}
+              />
+              <Dropdown
+                options={["0", "1"]}
+                value={fillWith}
+                onChange={handleFillWithChange}
+                disabled={!fill}
+                className="dropdown"
+                controlClassName="dropdown_control"
+                menuClassName="dropdown_menu"
+              ></Dropdown>
+            </div>
           </>
         )}
       </div>
-      <div className="bitbox">
+      <div id={`bitlist_box_area_${areaId}`} className="bitbox">
         {renderFillerBits()}
         {renderBits()}
         {renderBitNumbers()}

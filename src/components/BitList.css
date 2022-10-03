@@ -43,6 +43,10 @@
   position: relative;
 }
 
+.text_spacer.first {
+  width: 6px;
+}
+
 .cell {
   display: flex;
   grid-column-end: span 5;
@@ -213,4 +217,49 @@
 .byte_buttons button:disabled {
   background-color: rgb(190, 190, 190);
   cursor: not-allowed;
+}
+
+.fillerBox {
+  border: 1px solid grey;
+  display: inline-flex;
+  padding: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  background-color: rgb(36, 36, 36);
+  border-radius: 5px;
+  color: white;
+}
+
+.fillerBox input[type="checkbox"] {
+  height: 25px;
+  width: 25px;
+}
+
+.fillerBox input[type="checkbox"]:before {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.fillerBox .dropdown {
+  border: none;
+
+  position: relative;
+  width: 30px;
+  -moz-padding-start: calc(10px - 3px);
+  padding-left: 10px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+
+  box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.dropdown_control {
+}
+
+.dropdown_menu {
+  background-color: white;
+  color: black;
 }
