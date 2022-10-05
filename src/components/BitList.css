@@ -277,3 +277,33 @@
 .dropdown_placeholder {
   padding-left: 10px;
 }
+
+.input_wrapper {
+  background-color: rgb(36, 36, 36);
+  border-radius: 5px;
+  height: 45px;
+  padding: 0;
+  display: flex;
+  justify-content: end;
+  font-weight: bold;
+  width: 180px;
+}
+
+.input_wrapper .label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  color: white;
+}
+
+.input_wrapper input {
+  margin: 0;
+  width: 250%;
+}
+
+.input_wrapper input.hex_input {
+  text-transform: uppercase;
+  width: 150%;
+}

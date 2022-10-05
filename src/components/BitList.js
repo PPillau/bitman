@@ -26,6 +26,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   const [stickyCursor, setStickyCursor] = useState(false);
   const [fill, setFill] = useState(false);
   const [fillWith, setFillWith] = useState(filler);
+  const [decValue, setDecValue] = useState("");
+  const [hexValue, setHexValue] = useState("");
 
   /* ----------------- START list management ----------------- */
 
@@ -267,10 +269,16 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   const handleFillWithChange = useCallback(
     (option) => {
-      console.log(option.value);
       setFillWith(option.value);
     },
     [setFillWith]
+  );
+
+  const handleDecTextChange = useCallback(
+    (e) => {
+      setDecValue(formatDecimal(e.target.value));
+    },
+    [setDecValue]
   );
 
   /* ----------------- END UI callbacks ----------------- */
@@ -334,9 +342,17 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     };
   }, [handleKeyInput]);
 
-  // useEffect(() => {
-  //   console.log(getByte(0), "-----------------------------------------");
-  // }, [bitString]);
+  useEffect(() => {
+    const actualBitString = getBitString(fill);
+    const bitDecStringValue = getDecValueBasic(actualBitString);
+    if (bitDecStringValue > 1099511627775) {
+      setDecValue("Too large!");
+      setHexValue("Too large!");
+    } else {
+      setDecValue(formatDecimal(bitDecStringValue));
+      setHexValue(getHexValueBasic(actualBitString));
+    }
+  }, [bitString, fill, fillWith]);
 
   /* ----------------- END use effects & management ----------------- */
 
@@ -367,8 +383,20 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     return getSafeOutput(parseInt(input, 2).toString(10));
   };
 
+  const getDecValueBasic = (input) => {
+    return getSafeOutput(parseInt(input, 2).toString(10));
+  };
+
+  const getHexValueBasic = (input) => {
+    return getSafeOutput(parseInt(input, 2).toString(16));
+  };
+
   const getSafeOutput = (input) => {
     return getBitString(false) !== "" ? input : "-";
+  };
+
+  const formatDecimal = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const getRealBitSize = (_bitString, comparisonString) => {
@@ -453,11 +481,12 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     if (
       e.relatedTarget ||
       e.target.classList.contains("text_spacer") ||
-      refDragSelector.current.getSelection().length > 0
+      refDragSelector.current.getSelection().length > 0 ||
+      e.target.nodeName === "INPUT"
     ) {
       return;
     }
-
+    console.log(e, "-----------------------------------------");
     moveCursorToEnd();
   };
 
@@ -673,7 +702,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
       renderByteRulersResult.push(
         <div className="cell byte_ruler byte_ruler_cell">
-          <span className="byte_label">Byte {counter - 1}</span>
+          <span className="byte_label">Byte {counter}</span>
         </div>
       );
       counter--;
@@ -779,6 +808,20 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       <div className="button_area">
         {bitString !== "" && (
           <>
+            <div className="input_wrapper">
+              <div className="label">Dec:</div>
+              <input type="input" name="dec_input" value={decValue}></input>
+            </div>
+            <div className="input_wrapper">
+              <div className="label">Hex:</div>
+              <input
+                type="input"
+                name="hex_input"
+                value={hexValue}
+                className="hex_input"
+                disabled
+              ></input>
+            </div>
             <button onClick={deleteAllFromList}>
               <FontAwesomeIcon icon={faTrashCan} />
             </button>

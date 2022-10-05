@@ -4,6 +4,10 @@ import ReactTooltip from "react-tooltip";
 import "./Bit.css";
 
 const Bit = (props) => {
+  const formatDecimal = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   return (
     <div
       id={props.id}
@@ -22,8 +26,10 @@ const Bit = (props) => {
             return (
               <span>
                 {props.children} x 2<sup>{props.index}</sup> = {props.children}{" "}
-                x {Math.pow(2, props.index)} ={" "}
-                {props.children === "0" ? "0" : Math.pow(2, props.index)}
+                x {formatDecimal(Math.pow(2, props.index))} ={" "}
+                {props.children === "0"
+                  ? "0"
+                  : formatDecimal(Math.pow(2, props.index))}
               </span>
             );
           }}
