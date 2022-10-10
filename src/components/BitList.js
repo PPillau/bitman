@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { createRef, useCallback, useEffect } from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
 import Bit from "./Bit.js";
@@ -28,6 +28,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   const [fillWith, setFillWith] = useState(filler);
   const [decValue, setDecValue] = useState("");
   const [hexValue, setHexValue] = useState("");
+
+  const bitInputRef = createRef();
 
   /* ----------------- START list management ----------------- */
 
@@ -88,19 +90,18 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     return actualBitString.substring(cropStart, cropEnd);
   };
 
+  const getBitSectionFillAmount = useCallback(() => {
+    const fillAmount = refBitString.current.length % 8;
+    const byteAmount = refBitString.current.length / 8;
+
+    return (Math.floor(byteAmount) * 8 + fillAmount) * 5;
+  }, [refBitString]);
+
   /* --- END getters --- */
 
   const moveCursorToEnd = useCallback(() => {
     moveCursor(refBitString.current.length * 2);
   }, [cursorPosition]);
-
-  const moveCursorForwards = useCallback(() => {
-    moveCursor(refCursorPosition.current + 2);
-  }, [cursorPosition]);
-
-  const moveCursorBackwards = useCallback(() => {
-    moveCursor(refCursorPosition.current - 2);
-  }, [refCursorPosition.current]);
 
   const moveCursor = (pos) => {
     if (pos < 0 || pos > refBitString.current.length * 2 || pos % 2 !== 0) {
@@ -109,45 +110,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     document.getElementById(`bitElement_${pos}`).focus();
   };
 
-  const deleteSingleFromList = useCallback(
-    (pos) => {
-      setBitString(
-        refBitString.current.substr(0, pos - 1) +
-          refBitString.current.substr(pos)
-      );
-    },
-    [setBitString]
-  );
-
-  const deleteMultipleFromList = useCallback(
-    (selection) => {
-      const selectionDirectionObject = findOutSelectionDirection(selection);
-      if (selectionDirectionObject.direction) {
-        const cropStart = Math.ceil(selectionDirectionObject.first / 2 - 1);
-        const cropEnd = Math.ceil(selectionDirectionObject.last / 2);
-        setBitString(
-          refBitString.current.substr(0, cropStart) +
-            refBitString.current.substr(cropEnd)
-        );
-        moveCursor(selectionDirectionObject.first - 1);
-      } else {
-        const cropStart = Math.ceil(selectionDirectionObject.first / 2 - 1);
-        const cropEnd = Math.ceil(selectionDirectionObject.last / 2);
-        setBitString(
-          refBitString.current.substr(0, cropStart) +
-            refBitString.current.substr(cropEnd)
-        );
-        moveCursor(selectionDirectionObject.first - 1);
-      }
-      refDragSelector.current.clearSelection();
-    },
-    [setBitString]
-  );
-
   const deleteAllFromList = useCallback(() => {
     setBitString("");
-    setCursorPosition(0);
-    moveCursor(0);
   }, [setBitString, setCursorPosition]);
 
   const deleteFromListAt = useCallback(
@@ -163,22 +127,6 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       moveCursor(0);
     },
     [bitString, setBitString, setCursorPosition]
-  );
-
-  const addToList = useCallback(
-    (pos, key) => {
-      setBitString(
-        refBitString.current.substr(0, pos) +
-          key +
-          refBitString.current.substr(pos)
-      );
-
-      if (!stickyCursor) {
-        moveCursorForwards();
-      }
-      refDragSelector.current.clearSelection();
-    },
-    [setBitString, stickyCursor]
   );
 
   const changeToNewStringAt = useCallback(
@@ -210,7 +158,6 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     const replacementByte = getByte(byteNumber + byteDirection);
 
     const movedByteStartPosition = getByteStartPosition(byteNumber);
-    const movedByteEndPosition = getByteEndPosition(byteNumber);
     const replacementByteStartPosition = getByteStartPosition(
       byteNumber + byteDirection
     );
@@ -281,66 +228,29 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     [setDecValue]
   );
 
+  const handleBitInputChange = useCallback(
+    (e) => {
+      const localBitString = e.currentTarget.value;
+
+      setBitString(localBitString);
+    },
+    [refBitString, setBitString]
+  );
+
   /* ----------------- END UI callbacks ----------------- */
 
   /* ----------------- START use effects & management ----------------- */
-
-  const handleKeyInput = useCallback(
-    (e) => {
-      const numRegex = new RegExp("^[01]*$");
-      if (numRegex.test(parseInt(e.key))) {
-        //'0' or '1' on keyboard
-        addToList(refCursorPosition.current / 2, parseInt(e.key));
-      } else if (e.which === 39) {
-        //right arrow key
-        moveCursorForwards();
-      } else if (e.which === 37) {
-        //left arrow key
-        moveCursorBackwards();
-      } else if (e.which === 8) {
-        //Backspace key ("<---" key)
-        if (refDragSelector.current.getSelection().length > 0) {
-          //if selection exists delete selection
-          deleteMultipleFromList(refDragSelector.current.getSelection());
-        } else {
-          //if no selection exists delete bit left of current cursor
-          deleteSingleFromList(refCursorPosition.current / 2);
-          moveCursorBackwards();
-        }
-      } else if (e.which === 46) {
-        //delete key ("Entf" key)
-        if (refDragSelector.current.getSelection().length > 0) {
-          //if selection exists delete selection
-          deleteMultipleFromList(refDragSelector.current.getSelection());
-        } else {
-          //if no selection exists delete bit right of current cursor
-          deleteSingleFromList((refCursorPosition.current + 2) / 2);
-        }
-      }
-    },
-    [stickyCursor]
-  );
 
   //Initializer
   useEffect(() => {
     const dragSelect = new DragSelect({
       selectables: document.getElementsByClassName("selectable_bits"),
-      area: document.getElementById(`bitlist_area_${areaId}`),
+      area: document.getElementById(`bitlist_box_area_${areaId}`),
       draggability: false,
     });
     dragSelect.subscribe("callback", onSelection);
     setDragSelector(dragSelect);
-
-    moveCursor(cursorPosition);
   }, []);
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyInput);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyInput);
-    };
-  }, [handleKeyInput]);
 
   useEffect(() => {
     const actualBitString = getBitString(fill);
@@ -425,6 +335,13 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   const canByteMove = (byteNumber, direction) => {
     const unfinished = getBitString(false).length % 8;
+    // const canMoveLeft = direction &&
+    // (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0);
+    // const canMoveRight = !direction &&
+    // (getBitString(true).length / 8 === byteNumber + 1 ||
+    //   (byteNumber === 0 && !fill && unfinished > 0));
+
+    // return !(canMoveLeft || canMoveRight)
 
     if (
       direction &&
@@ -455,29 +372,29 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   const onSelection = useCallback(
     (selectionRes) => {
-      if (
-        selectionRes &&
-        selectionRes.items &&
-        selectionRes.items.length &&
-        selectionRes.items.length > 0
-      ) {
-        const selectionDirectionObject = findOutSelectionDirection(
-          selectionRes.items
-        );
+      // if (
+      //   selectionRes &&
+      //   selectionRes.items &&
+      //   selectionRes.items.length &&
+      //   selectionRes.items.length > 0
+      // ) {
+      //   const selectionDirectionObject = findOutSelectionDirection(
+      //     selectionRes.items
+      //   );
 
-        if (selectionDirectionObject.direction) {
-          moveCursor(selectionDirectionObject.last + 1);
-        } else {
-          moveCursor(selectionDirectionObject.first - 1);
-        }
-      }
+      //   if (selectionDirectionObject.direction) {
+      //     moveCursor(selectionDirectionObject.last + 1);
+      //   } else {
+      //     moveCursor(selectionDirectionObject.first - 1);
+      //   }
+      // }
 
       setSelection(selectionRes.items);
     },
     [selection]
   );
 
-  const focusTextArea = (e) => {
+  const focusTextArea = useCallback((e) => {
     if (
       e.relatedTarget ||
       e.target.classList.contains("text_spacer") ||
@@ -486,9 +403,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     ) {
       return;
     }
-    console.log(e, "-----------------------------------------");
     moveCursorToEnd();
-  };
+  }, []);
 
   const findOutSelectionDirection = (selectionItems) => {
     const first = parseInt(selectionItems[0].id.split("_")[1]);
@@ -502,6 +418,15 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       first: items[0],
       last: items[items.length - 1],
     };
+  };
+
+  const bit_input_bin_checker = (e) => {
+    const numRegex = new RegExp("^[01]*$");
+
+    if (e.which >= 48 && e.which <= 90) {
+      if (!numRegex.test(parseInt(e.key))) e.preventDefault();
+      return;
+    }
   };
 
   /* ----------------- END UI stuff ----------------- */
@@ -519,7 +444,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
         return;
       }
 
-      for (let i = 0; i < fillAmount - 1; i++) {
+      for (let i = 0; i < fillAmount; i++) {
         const bitElem = (
           <Bit id={`bitElement_${counter}`} key={counter} index={-1} type="2">
             {fillWith}
@@ -539,46 +464,6 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
         counter++;
       }
 
-      const firstInputElement = (
-        <input
-          maxLength="0"
-          className="text_spacer"
-          type="text"
-          dir="rtl"
-          id={`bitElement_0`}
-          key={0}
-          onFocus={(e) => {
-            onFocusTextArea(e, 0);
-          }}
-        />
-      );
-
-      const bitElem = (
-        <Bit id={`bitElement_${counter}`} key={counter} index={-1} type="2">
-          {fillWith}
-        </Bit>
-      );
-      counter++;
-      renderFillerBitsResult.push(
-        <div
-          key={counter}
-          className={classNames(
-            "cell",
-            "bit_cell",
-            "bit_cell_filler",
-            {
-              bit_cell_filler_first: fillAmount === 1,
-            },
-            {
-              bit_cell_filler_single: fillAmount === 1,
-            }
-          )}
-        >
-          {bitElem}
-          {firstInputElement}
-        </div>
-      );
-
       return renderFillerBitsResult;
     }
 
@@ -593,21 +478,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     let counter = 1,
       cellCounter = -1,
       bitCounter = refBitString.current.length - 1;
-    const renderBitsResult = [];
 
-    const firstInputElement = (
-      <input
-        maxLength="0"
-        className="text_spacer first"
-        type="text"
-        dir="rtl"
-        id={`bitElement_0`}
-        key={0}
-        onFocus={(e) => {
-          onFocusTextArea(e, 0);
-        }}
-      />
-    );
+    const renderBitsResult = [];
 
     bitString.split("").forEach((bit) => {
       if (["0", "1"].includes(bit)) {
@@ -624,46 +496,9 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
         counter++;
         bitCounter--;
 
-        const inputElement = (
-          <input
-            maxLength="0"
-            className="text_spacer"
-            type="text"
-            dir="rtl"
-            id={`bitElement_${counter}`}
-            key={counter}
-            onFocus={onFocusTextArea}
-          />
-        );
-        counter++;
-
-        renderBitsResult.push(
-          <div
-            key={cellCounter}
-            className={classNames("cell", "bit_cell", {
-              bit_cell_first:
-                counter === 3 &&
-                (!fill || 8 - (refBitString.current.length % 8) === 8),
-            })}
-          >
-            {counter === 3 &&
-              (!fill || 8 - (refBitString.current.length % 8) === 8) &&
-              firstInputElement}
-            {bitElement}
-            {inputElement}
-          </div>
-        );
-        cellCounter--;
+        renderBitsResult.push(bitElement);
       }
     });
-
-    if (renderBitsResult.length === 0) {
-      renderBitsResult.push(
-        <div key={cellCounter} className="cell bit_cell bit_cell_single">
-          {firstInputElement}
-        </div>
-      );
-    }
 
     if (refDragSelector.current.addSelectables) {
       refDragSelector.current.addSelectables(
@@ -680,14 +515,16 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
     if (fillAmount !== 8) {
       renderBitNumbersResult.push(
-        <div className={`bit_number_cell filler_${fillAmount}`}></div>
+        <div className={`bit_number_cell filler_${fillAmount}`} key="1"></div>
       );
     }
 
     let counter = refBitString.current.length;
-    refBitString.current.split("").forEach((bit) => {
+    refBitString.current.split("").forEach((bit, ind) => {
       renderBitNumbersResult.push(
-        <div className="cell bit_number_cell bit_number">{counter}</div>
+        <div className="cell bit_number_cell bit_number" key={ind + 2}>
+          {counter}
+        </div>
       );
       counter--;
     });
@@ -701,7 +538,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
     for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
       renderByteRulersResult.push(
-        <div className="cell byte_ruler byte_ruler_cell">
+        <div className="cell byte_ruler byte_ruler_cell" key={i}>
           <span className="byte_label">Byte {counter}</span>
         </div>
       );
@@ -718,7 +555,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
 
       renderByteValuesResult.push(
-        <div className="cell byte_values byte_values_cell">
+        <div className="cell byte_values byte_values_cell" key={i}>
           <span className="byte_label">
             <div>
               <b>Hex: </b>
@@ -750,7 +587,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
 
       renderByteButtonsResult.push(
-        <div className="cell byte_buttons byte_buttons_cell">
+        <div className="cell byte_buttons byte_buttons_cell" key={i}>
           <span className="byte_label">
             {" "}
             <button
@@ -800,78 +637,96 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   /* ----------------- END render methods ----------------- */
 
   return (
-    <div
-      className="bitlist"
-      id={`bitlist_area_${areaId}`}
-      onClick={(e) => focusTextArea(e)}
-    >
-      <div className="button_area">
-        {bitString !== "" && (
-          <>
-            <div className="input_wrapper">
-              <div className="label">Dec:</div>
-              <input type="input" name="dec_input" value={decValue}></input>
-            </div>
-            <div className="input_wrapper">
-              <div className="label">Hex:</div>
-              <input
-                type="input"
-                name="hex_input"
-                value={hexValue}
-                className="hex_input"
-                disabled
-              ></input>
-            </div>
-            <button onClick={deleteAllFromList}>
-              <FontAwesomeIcon icon={faTrashCan} />
-            </button>
-            <button onClick={copyAllFromListToClipboard}>
-              <FontAwesomeIcon icon={faCopy} />
-            </button>
-            <button onClick={() => invert(0, bitString.length)}>
-              <FontAwesomeIcon icon={faRepeat} />
-            </button>
-            <div className={`fillerBox box ${fill ? "" : "grey"}`}>
-              <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
+    <>
+      <div className="bitlist" id={`bitlist_area_${areaId}`}>
+        <div className="button_area">
+          {bitString !== "" && (
+            <>
+              <div className="input_wrapper">
+                <div className="label">Dec:</div>
+                <input
+                  type="input"
+                  name="dec_input"
+                  value={decValue}
+                  readOnly
+                ></input>
+              </div>
+              <div className="input_wrapper">
+                <div className="label">Hex:</div>
+                <input
+                  type="input"
+                  name="hex_input"
+                  value={hexValue}
+                  className="hex_input"
+                  disabled
+                  readOnly
+                ></input>
+              </div>
+              <button onClick={deleteAllFromList}>
+                <FontAwesomeIcon icon={faTrashCan} />
+              </button>
+              <button onClick={copyAllFromListToClipboard}>
+                <FontAwesomeIcon icon={faCopy} />
+              </button>
+              <button onClick={() => invert(0, bitString.length)}>
+                <FontAwesomeIcon icon={faRepeat} />
+              </button>
+              <div className={`fillerBox box ${fill ? "" : "grey"}`}>
+                <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
 
-              <input
-                name="fill"
-                type="checkbox"
-                checked={fill}
-                onChange={handleFillChange}
-              />
-              <Dropdown
-                options={["0", "1"]}
-                value={fillWith}
-                onChange={handleFillWithChange}
-                disabled={!fill}
-                className="dropdown"
-                controlClassName="dropdown_control"
-                menuClassName="dropdown_menu"
-                placeholderClassName="dropdown_placeholder"
-              ></Dropdown>
-            </div>
-            <div className={`fillerBox box `}>
-              <FontAwesomeIcon icon={faICursor} />
-              <input
-                name="sticky"
-                type="checkbox"
-                checked={stickyCursor}
-                onChange={handleStickyCursorChange}
-              />
-            </div>
-          </>
-        )}
+                <input
+                  name="fill"
+                  type="checkbox"
+                  checked={fill}
+                  onChange={handleFillChange}
+                />
+                <Dropdown
+                  options={["0", "1"]}
+                  value={fillWith}
+                  onChange={handleFillWithChange}
+                  disabled={!fill}
+                  className="dropdown"
+                  controlClassName="dropdown_control"
+                  menuClassName="dropdown_menu"
+                  placeholderClassName="dropdown_placeholder"
+                ></Dropdown>
+              </div>
+              <div className={`fillerBox box`}>
+                <FontAwesomeIcon icon={faICursor} />
+                <input
+                  name="sticky"
+                  type="checkbox"
+                  checked={stickyCursor}
+                  onChange={handleStickyCursorChange}
+                />
+              </div>
+            </>
+          )}
+        </div>
+        <div id={`bitlist_box_area_${areaId}`} className="bitbox">
+          {renderFillerBits()}
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${getBitSectionFillAmount()}`,
+            }}
+          >
+            {renderBits()}
+            <input
+              type="text"
+              className="bit_input_field"
+              onChange={handleBitInputChange}
+              onKeyDown={bit_input_bin_checker}
+              value={bitString}
+            ></input>
+          </div>
+          {renderBitNumbers()}
+          {renderByteRulers()}
+          {renderByteValues()}
+          {renderByteButtons()}
+        </div>
       </div>
-      <div id={`bitlist_box_area_${areaId}`} className="bitbox">
-        {renderFillerBits()}
-        {renderBits()}
-        {renderBitNumbers()}
-        {renderByteRulers()}
-        {renderByteValues()}
-        {renderByteButtons()}
-      </div>
-    </div>
+    </>
   );
 };
 

@@ -32,21 +32,6 @@
   cursor: pointer;
 }
 
-.text_spacer,
-.text_spacer:focus {
-  width: 10px;
-  height: 40px;
-  line-height: 40px;
-  font-size: 40px;
-  border: none;
-  outline: none;
-  position: relative;
-}
-
-.text_spacer.first {
-  width: 6px;
-}
-
 .cell {
   display: flex;
   grid-column-end: span 5;
@@ -78,22 +63,10 @@
   grid-row-start: 5;
 }
 
-.bit_cell_first {
-  grid-column-end: span 6;
-}
-
 .bit_cell_filler_first {
   grid-column-end: span 6;
   justify-content: center;
   padding: 0;
-}
-
-.bit_cell_filler_single {
-  padding-left: 14px;
-}
-
-.bit_cell_single {
-  grid-column-end: span 2;
 }
 
 .filler_7 {
@@ -306,4 +279,42 @@
 .input_wrapper input.hex_input {
   text-transform: uppercase;
   width: 150%;
+}
+
+.bit_area {
+  display: flex;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+  letter-spacing: 5px;
+  z-index: 2;
+  height: 48px;
+}
+
+.bit_input_field {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  height: 40px;
+  font-size: 1.5rem;
+  letter-spacing: 37.5px;
+  padding-left: 15px;
+  left: -15px;
+  color: black; /* sets the color of both caret and text */
+  -webkit-text-fill-color: transparent;
+  border: none;
+  width: 100%;
+  min-width: 200px;
+}
+
+.bit_input_field:focus {
+  outline: none;
+}
+
+.bit_section {
+  position: relative;
+  display: flex;
+  width: 100%;
+  z-index: 3;
 }

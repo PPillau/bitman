@@ -11,13 +11,19 @@ const Bit = (props) => {
   return (
     <div
       id={props.id}
-      className={classNames("bit", `background_${props.type}`, {
+      className={classNames("bit", {
         selectable_bits: props.type === "1",
       })}
       data-tip={"dummystring"}
       data-for={"bit_" + props.index}
     >
-      {props.children}
+      <div
+        className={classNames("bit_inner", `background_${props.type}`, {
+          selectable_bits: props.type === "1",
+        })}
+      >
+        {props.children}
+      </div>
       {props.type === "1" && (
         <ReactTooltip
           id={"bit_" + props.index}
