@@ -2,7 +2,6 @@ import { createRef, useCallback, useEffect } from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
 import Bit from "./Bit.js";
-import DragSelect from "dragselect";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -20,7 +19,6 @@ import Dropdown from "react-dropdown";
 const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState(initialBitString);
-  const [dragSelector, setDragSelector, refDragSelector] = useState({});
   const [selection, setSelection] = useState([]);
 
   const [stickyCursor, setStickyCursor] = useState(false);
@@ -99,20 +97,9 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   /* --- END getters --- */
 
-  const moveCursorToEnd = useCallback(() => {
-    moveCursor(refBitString.current.length * 2);
-  }, [cursorPosition]);
-
-  const moveCursor = (pos) => {
-    if (pos < 0 || pos > refBitString.current.length * 2 || pos % 2 !== 0) {
-      return;
-    }
-    document.getElementById(`bitElement_${pos}`).focus();
-  };
-
   const deleteAllFromList = useCallback(() => {
     setBitString("");
-  }, [setBitString, setCursorPosition]);
+  }, [setBitString]);
 
   const deleteFromListAt = useCallback(
     (start, end) => {
@@ -123,10 +110,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
         resultingBitString.substr(end, getBitString(false).length);
 
       setBitString(resultingBitString);
-      setCursorPosition(0);
-      moveCursor(0);
     },
-    [bitString, setBitString, setCursorPosition]
+    [bitString, setBitString]
   );
 
   const changeToNewStringAt = useCallback(
@@ -237,19 +222,30 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     [refBitString, setBitString]
   );
 
+  const handleSelect = useCallback(
+    (e) => {
+      const selectionStart = e.currentTarget.selectionStart;
+      const selectionEnd = e.currentTarget.selectionEnd;
+
+      setSelection([selectionStart, selectionEnd]);
+      setBitString(bitString);
+    },
+    [bitString, setBitString, setSelection]
+  );
+
   /* ----------------- END UI callbacks ----------------- */
 
   /* ----------------- START use effects & management ----------------- */
 
   //Initializer
   useEffect(() => {
-    const dragSelect = new DragSelect({
-      selectables: document.getElementsByClassName("selectable_bits"),
-      area: document.getElementById(`bitlist_box_area_${areaId}`),
-      draggability: false,
-    });
-    dragSelect.subscribe("callback", onSelection);
-    setDragSelector(dragSelect);
+    // const dragSelect = new DragSelect({
+    //   selectables: document.getElementsByClassName("selectable_bits"),
+    //   area: document.getElementById(`bitlist_box_area_${areaId}`),
+    //   draggability: false,
+    // });
+    // dragSelect.subscribe("callback", onSelection);
+    // setDragSelector(dragSelect);
   }, []);
 
   useEffect(() => {
@@ -370,56 +366,6 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     [setCursorPosition]
   );
 
-  const onSelection = useCallback(
-    (selectionRes) => {
-      // if (
-      //   selectionRes &&
-      //   selectionRes.items &&
-      //   selectionRes.items.length &&
-      //   selectionRes.items.length > 0
-      // ) {
-      //   const selectionDirectionObject = findOutSelectionDirection(
-      //     selectionRes.items
-      //   );
-
-      //   if (selectionDirectionObject.direction) {
-      //     moveCursor(selectionDirectionObject.last + 1);
-      //   } else {
-      //     moveCursor(selectionDirectionObject.first - 1);
-      //   }
-      // }
-
-      setSelection(selectionRes.items);
-    },
-    [selection]
-  );
-
-  const focusTextArea = useCallback((e) => {
-    if (
-      e.relatedTarget ||
-      e.target.classList.contains("text_spacer") ||
-      refDragSelector.current.getSelection().length > 0 ||
-      e.target.nodeName === "INPUT"
-    ) {
-      return;
-    }
-    moveCursorToEnd();
-  }, []);
-
-  const findOutSelectionDirection = (selectionItems) => {
-    const first = parseInt(selectionItems[0].id.split("_")[1]);
-    const last = parseInt(
-      selectionItems[selectionItems.length - 1].id.split("_")[1]
-    );
-    let items = selectionItems.map((item) => parseInt(item.id.split("_")[1]));
-    items.sort((a, b) => a - b);
-    return {
-      direction: first < last,
-      first: items[0],
-      last: items[items.length - 1],
-    };
-  };
-
   const bit_input_bin_checker = (e) => {
     const numRegex = new RegExp("^[01]*$");
 
@@ -476,16 +422,18 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   const renderBits = () => {
     let counter = 1,
-      cellCounter = -1,
       bitCounter = refBitString.current.length - 1;
 
     const renderBitsResult = [];
 
-    bitString.split("").forEach((bit) => {
+    bitString.split("").forEach((bit, ind) => {
       if (["0", "1"].includes(bit)) {
         const bitElement = (
           <Bit
             id={`bitElement_${counter}`}
+            className={classNames({
+              "ds-selected": _.inRange(ind, selection[0], selection[1]),
+            })}
             key={counter}
             index={bitCounter}
             type="1"
@@ -499,12 +447,6 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
         renderBitsResult.push(bitElement);
       }
     });
-
-    if (refDragSelector.current.addSelectables) {
-      refDragSelector.current.addSelectables(
-        document.getElementsByClassName("selectable_bits")
-      );
-    }
 
     return renderBitsResult;
   };
@@ -717,6 +659,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
               className="bit_input_field"
               onChange={handleBitInputChange}
               onKeyDown={bit_input_bin_checker}
+              onSelect={handleSelect}
               value={bitString}
             ></input>
           </div>

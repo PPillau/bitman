@@ -9,7 +9,7 @@
   z-index: 3 !important;
   pointer-events: none;
   grid-column-end: span 5;
-  padding-left: 3px;
+  padding-left: 4px;
   cursor: pointer;
 }
 

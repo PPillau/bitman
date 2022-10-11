@@ -11,9 +11,7 @@ const Bit = (props) => {
   return (
     <div
       id={props.id}
-      className={classNames("bit", {
-        selectable_bits: props.type === "1",
-      })}
+      className={classNames("bit", props.className)}
       data-tip={"dummystring"}
       data-for={"bit_" + props.index}
     >
