@@ -301,6 +301,7 @@
   letter-spacing: 35.5px;
   padding-left: 21px;
   left: -15px;
+  background: none;
   color: black; /* sets the color of both caret and text */
   -webkit-text-fill-color: transparent;
   border: none;

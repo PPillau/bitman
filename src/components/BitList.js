@@ -258,7 +258,10 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       setDecValue(formatDecimal(bitDecStringValue));
       setHexValue(getHexValueBasic(actualBitString));
     }
-  }, [bitString, fill, fillWith]);
+    if (stickyCursor) {
+      setCaretPosition(getCaretPosition() - 1);
+    }
+  }, [bitString, fill, fillWith, stickyCursor]);
 
   /* ----------------- END use effects & management ----------------- */
 
@@ -375,6 +378,28 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     }
   };
 
+  const setCaretPosition = useCallback(
+    (caretPos) => {
+      if (bitInputRef.current !== null) {
+        if (bitInputRef.current.createTextRange) {
+          const range = bitInputRef.current.createTextRange();
+          range.move("character", caretPos);
+          range.select();
+        } else {
+          if (bitInputRef.current.selectionStart >= 0) {
+            bitInputRef.current.focus();
+            bitInputRef.current.setSelectionRange(caretPos, caretPos);
+          } else bitInputRef.current.focus();
+        }
+      }
+    },
+    [bitInputRef]
+  );
+
+  const getCaretPosition = useCallback(() => {
+    return bitInputRef.current.selectionStart;
+  }, [bitInputRef]);
+
   /* ----------------- END UI stuff ----------------- */
 
   /* ----------------- START render methods ----------------- */
@@ -396,17 +421,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
             {fillWith}
           </Bit>
         );
-        counter++;
-        renderFillerBitsResult.push(
-          <div
-            key={counter}
-            className={classNames("cell", "bit_cell", "bit_cell_filler", {
-              bit_cell_filler_first: i === 0,
-            })}
-          >
-            {bitElem}
-          </div>
-        );
+        renderFillerBitsResult.push(bitElem);
         counter++;
       }
 
@@ -660,6 +675,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
               onChange={handleBitInputChange}
               onKeyDown={bit_input_bin_checker}
               onSelect={handleSelect}
+              ref={bitInputRef}
               value={bitString}
             ></input>
           </div>
