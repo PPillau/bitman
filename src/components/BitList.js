@@ -32,19 +32,22 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   /* ----------------- START list management ----------------- */
 
   /* --- START getters --- */
-  const getBitString = (filled) => {
-    if (filled && fillWith !== "" && bitString.length > 0) {
-      const fillAmount = 8 - (refBitString.current.length % 8);
+  const getBitString = useCallback(
+    (filled) => {
+      if (filled && fillWith !== "" && bitString.length > 0) {
+        const fillAmount = 8 - (refBitString.current.length % 8);
 
-      if (fillAmount === 8) {
+        if (fillAmount === 8) {
+          return bitString;
+        }
+
+        return _.padStart(bitString, bitString.length + fillAmount, fillWith);
+      } else {
         return bitString;
       }
-
-      return _.padStart(bitString, bitString.length + fillAmount, fillWith);
-    } else {
-      return bitString;
-    }
-  };
+    },
+    [bitString]
+  );
 
   const getByteStartPosition = useCallback(
     (byteNumber) => {
@@ -184,12 +187,15 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   /* ----------------- START UI callbacks ----------------- */
 
   const copyAllFromListToClipboard = useCallback(() => {
-    navigator.clipboard.writeText(getBitString(true));
-  }, [bitString]);
+    navigator.clipboard.writeText(getBitString(fill));
+  }, [fill, bitString]);
 
-  const copyByteToClipboad = (byteNumber) => {
-    navigator.clipboard.writeText(getByte(byteNumber));
-  };
+  const copyByteToClipboad = useCallback(
+    (byteNumber) => {
+      navigator.clipboard.writeText(getByte(byteNumber, fill));
+    },
+    [fill, bitString]
+  );
 
   const handleFillChange = useCallback(() => {
     setFill(!fill);
@@ -220,6 +226,16 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       setBitString(localBitString);
     },
     [refBitString, setBitString]
+  );
+
+  const handleDecInputChange = useCallback(
+    (e) => {
+      const localDecString = e.currentTarget.value.replace(/\D/g, "");
+      const newBitString = dec2bin(localDecString);
+      setBitString(newBitString);
+      e.currentTarget.value = formatDecimal(localDecString);
+    },
+    [setBitString]
   );
 
   const handleSelect = useCallback(
@@ -504,6 +520,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
     return renderByteRulersResult;
   };
+
   const renderByteValues = () => {
     const renderByteValuesResult = [];
     let counter = Math.ceil(refBitString.current.length / 8);
@@ -536,6 +553,7 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
     return renderByteValuesResult;
   };
+
   const renderByteButtons = () => {
     const renderByteButtonsResult = [];
     let counter = Math.ceil(refBitString.current.length / 8);
@@ -597,68 +615,66 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     <>
       <div className="bitlist" id={`bitlist_area_${areaId}`}>
         <div className="button_area">
-          {bitString !== "" && (
-            <>
-              <div className="input_wrapper">
-                <div className="label">Dec:</div>
-                <input
-                  type="input"
-                  name="dec_input"
-                  value={decValue}
-                  readOnly
-                ></input>
-              </div>
-              <div className="input_wrapper">
-                <div className="label">Hex:</div>
-                <input
-                  type="input"
-                  name="hex_input"
-                  value={hexValue}
-                  className="hex_input"
-                  disabled
-                  readOnly
-                ></input>
-              </div>
-              <button onClick={deleteAllFromList}>
-                <FontAwesomeIcon icon={faTrashCan} />
-              </button>
-              <button onClick={copyAllFromListToClipboard}>
-                <FontAwesomeIcon icon={faCopy} />
-              </button>
-              <button onClick={() => invert(0, bitString.length)}>
-                <FontAwesomeIcon icon={faRepeat} />
-              </button>
-              <div className={`fillerBox box ${fill ? "" : "grey"}`}>
-                <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
+          <>
+            <div className="input_wrapper">
+              <div className="label">Dec:</div>
+              <input
+                type="input"
+                name="dec_input"
+                value={decValue}
+                onChange={handleDecInputChange}
+              ></input>
+            </div>
+            <div className="input_wrapper">
+              <div className="label">Hex:</div>
+              <input
+                type="input"
+                name="hex_input"
+                value={hexValue}
+                className="hex_input"
+                disabled
+                readOnly
+              ></input>
+            </div>
+            <button onClick={deleteAllFromList}>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+            <button onClick={copyAllFromListToClipboard}>
+              <FontAwesomeIcon icon={faCopy} />
+            </button>
+            <button onClick={() => invert(0, bitString.length)}>
+              <FontAwesomeIcon icon={faRepeat} />
+            </button>
+            <div className={`fillerBox box ${fill ? "" : "grey"}`}>
+              <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
 
-                <input
-                  name="fill"
-                  type="checkbox"
-                  checked={fill}
-                  onChange={handleFillChange}
-                />
-                <Dropdown
-                  options={["0", "1"]}
-                  value={fillWith}
-                  onChange={handleFillWithChange}
-                  disabled={!fill}
-                  className="dropdown"
-                  controlClassName="dropdown_control"
-                  menuClassName="dropdown_menu"
-                  placeholderClassName="dropdown_placeholder"
-                ></Dropdown>
-              </div>
-              <div className={`fillerBox box`}>
-                <FontAwesomeIcon icon={faICursor} />
-                <input
-                  name="sticky"
-                  type="checkbox"
-                  checked={stickyCursor}
-                  onChange={handleStickyCursorChange}
-                />
-              </div>
-            </>
-          )}
+              <input
+                name="fill"
+                type="checkbox"
+                checked={fill}
+                onChange={handleFillChange}
+              />
+              <Dropdown
+                options={["0", "1"]}
+                value={fillWith}
+                onChange={handleFillWithChange}
+                disabled={!fill}
+                className="dropdown"
+                controlClassName="dropdown_control"
+                menuClassName="dropdown_menu"
+                placeholderClassName="dropdown_placeholder"
+              ></Dropdown>
+            </div>
+            <div className={`fillerBox box`}>
+              <FontAwesomeIcon icon={faICursor} />
+              <input
+                name="sticky"
+                type="checkbox"
+                checked={stickyCursor}
+                onChange={handleStickyCursorChange}
+              />
+            </div>
+          </>
         </div>
         <div id={`bitlist_box_area_${areaId}`} className="bitbox">
           {renderFillerBits()}

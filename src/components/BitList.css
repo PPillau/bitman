@@ -281,17 +281,6 @@
   width: 150%;
 }
 
-.bit_area {
-  display: flex;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+/Edge */
-  user-select: none; /* Standard */
-  letter-spacing: 5px;
-  z-index: 2;
-  height: 48px;
-}
-
 .bit_input_field {
   position: absolute;
   top: 0;
