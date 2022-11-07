@@ -33,15 +33,15 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
   /* --- START getters --- */
   const getBitString = useCallback(
-    (filled) => {
-      if (filled && fillWith !== "" && bitString.length > 0) {
+    (filled, filler = "") => {
+      if (filled && filler !== "" && bitString.length > 0) {
         const fillAmount = 8 - (refBitString.current.length % 8);
 
         if (fillAmount === 8) {
           return bitString;
         }
 
-        return _.padStart(bitString, bitString.length + fillAmount, fillWith);
+        return _.padStart(bitString, bitString.length + fillAmount, filler);
       } else {
         return bitString;
       }
@@ -71,8 +71,8 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     return unfinished === 0 ? 8 : unfinished;
   }, [bitString]);
 
-  const getByte = (pos, withFiller = true) => {
-    const actualBitString = getBitString(withFiller);
+  const getByte = (pos, withFiller = true, filler = "") => {
+    const actualBitString = getBitString(withFiller, filler);
     if (Math.ceil(actualBitString.length / 8) < pos) {
       return "";
     }
@@ -187,14 +187,14 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
   /* ----------------- START UI callbacks ----------------- */
 
   const copyAllFromListToClipboard = useCallback(() => {
-    navigator.clipboard.writeText(getBitString(fill));
-  }, [fill, bitString]);
+    navigator.clipboard.writeText(getBitString(fill, fillWith));
+  }, [fill, fillWith, bitString]);
 
   const copyByteToClipboad = useCallback(
     (byteNumber) => {
-      navigator.clipboard.writeText(getByte(byteNumber, fill));
+      navigator.clipboard.writeText(getByte(byteNumber, fill, fillWith));
     },
-    [fill, bitString]
+    [fill, fillWith, bitString]
   );
 
   const handleFillChange = useCallback(() => {
