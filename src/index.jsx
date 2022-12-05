@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom";
 
-import App from "./App.js";
+import App from "./App.jsx";
 import "./styles.css";
 
 const appRouting = <App />;

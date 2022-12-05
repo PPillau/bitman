@@ -2,7 +2,7 @@ const path = require("path");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  entry: "./index.js",
+  entry: "./index.jsx",
   resolve: {
     alias: {
       "react-dom": "@hot-loader/react-dom",

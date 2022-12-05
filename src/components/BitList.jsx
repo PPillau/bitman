@@ -1,7 +1,7 @@
 import { createRef, useCallback, useEffect } from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
-import Bit from "./Bit.js";
+import Bit from "./Bit.jsx";
 import classNames from "classnames/bind";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -134,53 +134,60 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     [bitString, setBitString]
   );
 
-  const moveByte = useCallback((byteNumber, direction, e = null) => {
-    if (e !== null) {
-      e.stopPropagation();
-    }
+  const moveByte = useCallback(
+    (byteNumber, direction, e = null) => {
+      if (e !== null) {
+        e.stopPropagation();
+      }
 
-    let resultingBitString = bitString;
-    const byteDirection = direction ? -1 : 1;
+      let resultingBitString = bitString;
+      const byteDirection = direction ? -1 : 1;
 
-    const movedByte = getByte(byteNumber);
-    const replacementByte = getByte(byteNumber + byteDirection);
+      const movedByte = getByte(byteNumber, fill, fillWith);
+      const replacementByte = getByte(
+        byteNumber + byteDirection,
+        fill,
+        fillWith
+      );
 
-    const movedByteStartPosition = getByteStartPosition(byteNumber);
-    const replacementByteStartPosition = getByteStartPosition(
-      byteNumber + byteDirection
-    );
-    const replacementdByteEndPosition = getByteEndPosition(
-      byteNumber + byteDirection
-    );
+      const movedByteStartPosition = getByteStartPosition(byteNumber);
+      const replacementByteStartPosition = getByteStartPosition(
+        byteNumber + byteDirection
+      );
+      const replacementdByteEndPosition = getByteEndPosition(
+        byteNumber + byteDirection
+      );
 
-    if (direction) {
-      //move left
+      if (direction) {
+        //move left
 
-      resultingBitString =
-        resultingBitString.substr(0, replacementByteStartPosition) +
-        movedByte +
-        replacementByte +
-        resultingBitString.substr(
-          replacementByteStartPosition +
-            movedByte.length +
-            replacementByte.length,
-          resultingBitString.length
-        );
-    } else {
-      //move right
+        resultingBitString =
+          resultingBitString.substr(0, replacementByteStartPosition) +
+          movedByte +
+          replacementByte +
+          resultingBitString.substr(
+            replacementByteStartPosition +
+              movedByte.length +
+              replacementByte.length,
+            resultingBitString.length
+          );
+      } else {
+        //move right
 
-      resultingBitString =
-        resultingBitString.substr(0, movedByteStartPosition) +
-        replacementByte +
-        movedByte +
-        resultingBitString.substr(
-          replacementdByteEndPosition,
-          resultingBitString.length
-        );
-    }
+        resultingBitString =
+          resultingBitString.substr(0, movedByteStartPosition) +
+          replacementByte +
+          movedByte +
+          resultingBitString.substr(
+            replacementdByteEndPosition,
+            resultingBitString.length
+          );
+      }
 
-    setBitString(resultingBitString);
-  });
+      setBitString(resultingBitString);
+    },
+    [fill, fillWith, bitString]
+  );
 
   /* ----------------- END list management ----------------- */
 
@@ -348,31 +355,34 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     }
   };
 
-  const canByteMove = (byteNumber, direction) => {
-    const unfinished = getBitString(false).length % 8;
-    // const canMoveLeft = direction &&
-    // (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0);
-    // const canMoveRight = !direction &&
-    // (getBitString(true).length / 8 === byteNumber + 1 ||
-    //   (byteNumber === 0 && !fill && unfinished > 0));
+  const canByteMove = useCallback(
+    (byteNumber, direction) => {
+      const unfinished = getBitString(false).length % 8;
+      // const canMoveLeft = direction &&
+      // (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0);
+      // const canMoveRight = !direction &&
+      // (getBitString(true).length / 8 === byteNumber + 1 ||
+      //   (byteNumber === 0 && !fill && unfinished > 0));
 
-    // return !(canMoveLeft || canMoveRight)
+      // return !(canMoveLeft || canMoveRight)
 
-    if (
-      direction &&
-      (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0))
-    ) {
-      return false;
-    } else if (
-      !direction &&
-      (getBitString(true).length / 8 === byteNumber + 1 ||
-        (byteNumber === 0 && !fill && unfinished > 0))
-    ) {
-      return false;
-    } else {
-      return true;
-    }
-  };
+      if (
+        direction &&
+        (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0))
+      ) {
+        return false;
+      } else if (
+        !direction &&
+        (Math.ceil(getBitString(true).length / 8) === byteNumber + 1 ||
+          (byteNumber === 0 && !fill && unfinished > 0))
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+    [fill, bitString]
+  );
 
   /* ----------------- END helper methods ----------------- */
 
@@ -534,16 +544,16 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
             <div>
               <b>Hex: </b>
               <span className="hex_val">
-                {getHexValue(getByte(byteNumber, fill), fill)}
+                {getHexValue(getByte(byteNumber, fill, fillWith), fill)}
               </span>
             </div>
             <div>
               <b>Dec: </b>
-              {getDecValue(getByte(byteNumber, fill), fill)}
+              {getDecValue(getByte(byteNumber, fill, fillWith), fill)}
             </div>
             <div>
               <b>Oct: </b>
-              {getOctValue(getByte(byteNumber, fill), fill)}
+              {getOctValue(getByte(byteNumber, fill, fillWith), fill)}
             </div>
           </span>
         </div>
