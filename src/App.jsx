@@ -7,15 +7,32 @@ import { useState, useCallback } from "react";
 
 const App = () => {
   const [lists, setLists] = useState([
-    <BitList initialBitString="" fillWith="0" />,
+    <BitList inputBitString="101" fillWith="0" key="0" />,
   ]);
-  const addNewBitList = useCallback(() => {}, []);
+
+  const addNewBitList = useCallback(() => {
+    setLists([
+      ...lists,
+      <BitList
+        inputBitString=""
+        fillWith="0"
+        key={lists.length}
+        deleteBitListCallback={() => deletBitList(lists.length)}
+        isDeletable={true}
+      />,
+    ]);
+  }, [lists, setLists]);
+
+  const deletBitList = (index) => {
+    setLists((oldLists) => {
+      oldLists.splice(index, 1);
+      return [...oldLists];
+    });
+  };
 
   return (
     <>
-      {lists.map((list) => (
-        <>{list}</>
-      ))}
+      {lists}
       <div className="add_operation_container">
         <Dropdown
           value="Addition"

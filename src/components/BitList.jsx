@@ -16,9 +16,15 @@ import {
 import _ from "lodash";
 import Dropdown from "react-dropdown";
 
-const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
+const BitList = ({
+  areaId = 0,
+  inputBitString,
+  filler = "0",
+  deleteBitListCallback = undefined,
+  isDeletable = false,
+}) => {
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
-  const [bitString, setBitString, refBitString] = useState(initialBitString);
+  const [bitString, setBitString, refBitString] = useState("");
   const [selection, setSelection] = useState([]);
 
   const [stickyCursor, setStickyCursor] = useState(false);
@@ -97,6 +103,13 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
     return (Math.floor(byteAmount) * 8 + fillAmount) * 5;
   }, [refBitString]);
+
+  const getInputBitSectionFillAmount = () => {
+    const fillAmount = inputBitString.length % 8;
+    const byteAmount = inputBitString.length / 8;
+
+    return (Math.floor(byteAmount) * 8 + fillAmount) * 5;
+  };
 
   /* --- END getters --- */
 
@@ -443,7 +456,13 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
 
       for (let i = 0; i < fillAmount; i++) {
         const bitElem = (
-          <Bit id={`bitElement_${counter}`} key={counter} index={-1} type="2">
+          <Bit
+            id={` bitElement_${counter}`}
+            className="bit_cell"
+            key={counter}
+            index={-1}
+            type="2"
+          >
             {fillWith}
           </Bit>
         );
@@ -459,6 +478,29 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     }
 
     return "";
+  };
+
+  const renderInputBitsFiller = () => {
+    if (inputBitString.length === 0) {
+      return "";
+    }
+
+    const bitAmount = getInputBitSectionFillAmount() / 5;
+    let byteAmountRounded = Math.ceil(refBitString.current.length / 8);
+    if (byteAmountRounded <= 0) {
+      byteAmountRounded = 1;
+    }
+
+    let fillAmount = byteAmountRounded * 8 - bitAmount;
+
+    return (
+      <div
+        className="input_bitstring_filler_cell"
+        style={{
+          gridColumnEnd: `span ${fillAmount * 5}`,
+        }}
+      ></div>
+    );
   };
 
   const renderBits = () => {
@@ -490,6 +532,37 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
     });
 
     return renderBitsResult;
+  };
+
+  const renderInputBits = () => {
+    let counter = 1,
+      bitCounter = inputBitString.length - 1;
+
+    const renderInputBitsResult = [];
+
+    inputBitString.split("").forEach((bit, ind) => {
+      if (["0", "1"].includes(bit)) {
+        const bitElement = (
+          <Bit
+            id={`bitElement_${counter}`}
+            className={classNames({
+              "ds-selected": _.inRange(ind, selection[0], selection[1]),
+            })}
+            key={counter}
+            index={bitCounter}
+            type="3"
+          >
+            {bit}
+          </Bit>
+        );
+        counter++;
+        bitCounter--;
+
+        renderInputBitsResult.push(bitElement);
+      }
+    });
+
+    return renderInputBitsResult;
   };
 
   const renderBitNumbers = () => {
@@ -626,6 +699,18 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
       <div className="bitlist" id={`bitlist_area_${areaId}`}>
         <div className="button_area">
           <>
+            {isDeletable && (
+              <button
+                onClick={
+                  deleteBitListCallback !== undefined
+                    ? deleteBitListCallback
+                    : null
+                }
+              >
+                X
+              </button>
+            )}
+
             <div className="input_wrapper">
               <div className="label">Dec:</div>
               <input
@@ -686,7 +771,22 @@ const BitList = ({ areaId = 0, initialBitString, filler = "0" }) => {
             </div>
           </>
         </div>
-        <div id={`bitlist_box_area_${areaId}`} className="bitbox">
+        <div
+          id={`bitlist_box_area_${areaId}`}
+          className={classNames({
+            bitbox: true,
+            input_extended: inputBitString.length > 0,
+          })}
+        >
+          {renderInputBitsFiller()}
+          <div
+            className="input_bitstring_cell"
+            style={{
+              gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
+            }}
+          >
+            {renderInputBits()}
+          </div>
           {renderFillerBits()}
           <div
             className="bit_section"
