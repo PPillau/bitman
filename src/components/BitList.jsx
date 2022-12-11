@@ -1,4 +1,10 @@
-import { createRef, useCallback, useEffect } from "react";
+import {
+  createRef,
+  useCallback,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
 import Bit from "./Bit.jsx";
@@ -16,13 +22,14 @@ import {
 import _ from "lodash";
 import Dropdown from "react-dropdown";
 
-const BitList = ({
-  areaId = 0,
-  inputBitString,
-  filler = "0",
-  deleteBitListCallback = undefined,
-  isDeletable = false,
-}) => {
+const BitList = forwardRef((props, ref) => {
+  const {
+    areaId = 0,
+    inputBitString = "",
+    filler = "0",
+    deleteBitListCallback = undefined,
+    isDeletable = false,
+  } = props;
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState("");
   const [selection, setSelection] = useState([]);
@@ -34,6 +41,13 @@ const BitList = ({
   const [hexValue, setHexValue] = useState("");
 
   const bitInputRef = createRef();
+
+  useImperativeHandle(ref, () => {
+    getBitStringRef: () => {
+      console.log(bitString, "XXXX");
+      return bitString;
+    };
+  });
 
   /* ----------------- START list management ----------------- */
 
@@ -813,6 +827,6 @@ const BitList = ({
       </div>
     </>
   );
-};
+});
 
 export default BitList;
