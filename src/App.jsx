@@ -1,14 +1,22 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
 import { hot } from "react-hot-loader";
-import BitList from "./components/BitList.jsx";
+import BitList, { OPERATIONS } from "./components/BitList.jsx";
 import Dropdown from "react-dropdown";
 import { useState, useCallback, createRef, useRef, useEffect } from "react";
 
 const App = () => {
   const ref = useRef();
+  const [, updateState] = useState();
+  4;
+  const forceUpdate = useCallback(() => updateState({}), []);
   const [lists, setLists] = useState([0]);
-  const firstElement = <BitList fillWith="0" key={0} ref={ref} />;
+  const updateCallback = useCallback(() => {
+    forceUpdate();
+  }, [lists, setLists]);
+  const firstElement = (
+    <BitList fillWith="0" key={0} ref={ref} updateCallback={updateCallback} />
+  );
   // const [refs, setRefs] = useState([]);
 
   // const addToRefs = (el) => {
@@ -48,12 +56,12 @@ const App = () => {
       })}
       <div className="add_operation_container">
         <Dropdown
-          value="Addition"
+          value={Object.keys(OPERATIONS)[0]}
           className="operations_dropdown"
           controlClassName="operations_dropdown_control"
           menuClassName="operations_dropdown_menu"
           placeholderClassName="operations_dropdown_placeholder"
-          options={["Addition", "Subtraction", "Division", "Multiplication"]}
+          options={Object.keys(OPERATIONS)}
         ></Dropdown>
         <button className="add_operation" onClick={addNewBitList}>
           <FontAwesomeIcon icon={faAdd} />

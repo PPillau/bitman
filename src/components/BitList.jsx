@@ -19,8 +19,22 @@ import {
   faArrowsLeftRightToLine,
   faICursor,
 } from "@fortawesome/free-solid-svg-icons";
-import _ from "lodash";
+import _, { result, update } from "lodash";
 import Dropdown from "react-dropdown";
+
+export const OPERATIONS = {
+  AND: 0,
+  OR: 1,
+  NOT: 2,
+  XOR: 3,
+  NOR: 4,
+  SHIFT_LEFT: 5,
+  SHIFT_RIGHT: 6,
+  ADDITION: 7,
+  SUBTRACTION: 8,
+  MULTIPLICAITON: 9,
+  DIVISION: 10,
+};
 
 const BitList = forwardRef((props, ref) => {
   const {
@@ -29,6 +43,8 @@ const BitList = forwardRef((props, ref) => {
     filler = "0",
     deleteBitListCallback = undefined,
     isDeletable = false,
+    updateCallback = undefined,
+    inputBitOperation = OPERATIONS.AND,
   } = props;
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState("");
@@ -39,12 +55,19 @@ const BitList = forwardRef((props, ref) => {
   const [fillWith, setFillWith] = useState(filler);
   const [decValue, setDecValue] = useState("");
   const [hexValue, setHexValue] = useState("");
+  const [bitOperation, setBitOperation] = useState(inputBitOperation);
 
   const bitInputRef = createRef();
 
-  useImperativeHandle(ref, () => ({
-    getBitStringRef: () => bitString,
-  }));
+  useImperativeHandle(
+    ref,
+    useCallback(
+      () => ({
+        getBitStringRef: () => getBitString(fill, fillWith),
+      }),
+      [fill, fillWith, bitString]
+    )
+  );
 
   /* ----------------- START list management ----------------- */
 
@@ -120,6 +143,15 @@ const BitList = forwardRef((props, ref) => {
     const byteAmount = inputBitString.length / 8;
 
     return (Math.floor(byteAmount) * 8 + fillAmount) * 5;
+  };
+
+  const getBitStringFullLength = (shouldFill = true) => {
+    return (
+      Math.max(
+        getBitString(shouldFill, fillWith).length,
+        inputBitString.length
+      ) * 5
+    );
   };
 
   /* --- END getters --- */
@@ -296,8 +328,13 @@ const BitList = forwardRef((props, ref) => {
   }, []);
 
   useEffect(() => {
+    if (updateCallback) {
+      updateCallback();
+    }
+
     const actualBitString = getBitString(fill);
     const bitDecStringValue = getDecValueBasic(actualBitString);
+
     if (bitDecStringValue > 1099511627775) {
       setDecValue("Too large!");
       setHexValue("Too large!");
@@ -305,6 +342,7 @@ const BitList = forwardRef((props, ref) => {
       setDecValue(formatDecimal(bitDecStringValue));
       setHexValue(getHexValueBasic(actualBitString));
     }
+
     if (stickyCursor) {
       setCaretPosition(getCaretPosition() - 1);
     }
@@ -407,6 +445,19 @@ const BitList = forwardRef((props, ref) => {
     },
     [fill, bitString]
   );
+
+  const bitwiseOperation = useCallback(() => {
+    let result = "";
+    switch (bitOperation) {
+      case OPERATIONS.AND:
+        result = (
+          parseInt(inputBitString, 2) &
+          parseInt(getBitString(fill, fillWith), 2)
+        ).toString(2);
+    }
+
+    return result.padStart(bitString.length, "0");
+  }, [bitOperation, bitString]);
 
   /* ----------------- END helper methods ----------------- */
 
@@ -576,9 +627,50 @@ const BitList = forwardRef((props, ref) => {
     return renderInputBitsResult;
   };
 
+  const renderBitOperationResult = () => {
+    const actualBitString = getBitString(fill, fillWith);
+    const renderBitOperationResult = [];
+
+    if (actualBitString.length !== inputBitString.length) {
+      const length = getBitStringFullLength(false) / 5;
+      for (let i = 0; i < length; i++) {
+        renderBitOperationResult.push(
+          <Bit type="4" key={i}>
+            ?
+          </Bit>
+        );
+      }
+    } else {
+      //The actual magic
+      const operationResult = bitwiseOperation();
+      for (let i = 0; i < operationResult.length; i++) {
+        renderBitOperationResult.push(
+          <Bit type="4" key={i}>
+            {operationResult.charAt(i)}
+          </Bit>
+        );
+      }
+    }
+
+    return renderBitOperationResult;
+  };
+
   const renderBitNumbers = () => {
     const fillAmount = 8 - (refBitString.current.length % 8);
     const renderBitNumbersResult = [];
+
+    if (inputBitString.length > 0) {
+      let counter = getBitStringFullLength() / 5;
+      for (let i = 0; i < getBitStringFullLength() / 5; i++) {
+        renderBitNumbersResult.push(
+          <div className="cell bit_number_cell bit_number" key={i}>
+            {counter}
+          </div>
+        );
+        counter--;
+      }
+      return renderBitNumbersResult;
+    }
 
     if (fillAmount !== 8) {
       renderBitNumbersResult.push(
@@ -788,7 +880,6 @@ const BitList = forwardRef((props, ref) => {
           input_extended: inputBitString.length > 0,
         })}
       >
-        {renderInputBitsFiller()}
         <div
           className="input_bitstring_cell"
           style={{
@@ -815,6 +906,24 @@ const BitList = forwardRef((props, ref) => {
             value={bitString}
           ></input>
         </div>
+        {inputBitString.length > 0 && (
+          <>
+            <div
+              className="operation_results_separator"
+              style={{
+                gridColumnEnd: `span ${getBitStringFullLength()}`,
+              }}
+            ></div>{" "}
+            <div
+              className="operation_bit_section"
+              style={{
+                gridColumnEnd: `span ${getBitStringFullLength(false)}`,
+              }}
+            >
+              {renderBitOperationResult()}
+            </div>
+          </>
+        )}
         {renderBitNumbers()}
         {renderByteRulers()}
         {renderByteValues()}

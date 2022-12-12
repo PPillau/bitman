@@ -15,6 +15,10 @@
   overflow-x: scroll;
 }
 
+.bitbox.input_extended {
+  grid-template-rows: repeat(2, 3rem) 1rem repeat(5, 3rem);
+}
+
 .button_area {
   height: 45px;
   padding-bottom: 10px;
@@ -77,20 +81,28 @@
   grid-row-start: 2;
 }
 
-.input_extended .bit_number_cell {
+.input_extended .operation_results_separator {
   grid-row-start: 3;
 }
 
-.input_extended .byte_ruler_cell {
+.input_extended .operation_bit_section {
   grid-row-start: 4;
 }
 
-.input_extended .byte_values_cell {
+.input_extended .bit_number_cell {
   grid-row-start: 5;
 }
 
-.input_extended .byte_buttons_cell {
+.input_extended .byte_ruler_cell {
   grid-row-start: 6;
+}
+
+.input_extended .byte_values_cell {
+  grid-row-start: 7;
+}
+
+.input_extended .byte_buttons_cell {
+  grid-row-start: 8;
 }
 
 /* extended row-positions */
@@ -119,6 +131,16 @@
 }
 .filler_1 {
   grid-column-end: span 5;
+}
+
+.operation_results_separator {
+  border-top: 2px solid black;
+  width: 100%;
+  display: flex;
+}
+
+.operation_bit_section {
+  display: flex;
 }
 
 .bit_number {
