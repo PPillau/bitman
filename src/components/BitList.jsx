@@ -42,12 +42,9 @@ const BitList = forwardRef((props, ref) => {
 
   const bitInputRef = createRef();
 
-  useImperativeHandle(ref, () => {
-    getBitStringRef: () => {
-      console.log(bitString, "XXXX");
-      return bitString;
-    };
-  });
+  useImperativeHandle(ref, () => ({
+    getBitStringRef: () => bitString,
+  }));
 
   /* ----------------- START list management ----------------- */
 
@@ -709,123 +706,121 @@ const BitList = forwardRef((props, ref) => {
   /* ----------------- END render methods ----------------- */
 
   return (
-    <>
-      <div className="bitlist" id={`bitlist_area_${areaId}`}>
-        <div className="button_area">
-          <>
-            {isDeletable && (
-              <button
-                onClick={
-                  deleteBitListCallback !== undefined
-                    ? deleteBitListCallback
-                    : null
-                }
-              >
-                X
-              </button>
-            )}
+    <div className="bitlist" id={`bitlist_area_${areaId}`} ref={ref}>
+      <div className="button_area">
+        <>
+          {isDeletable && (
+            <button
+              onClick={
+                deleteBitListCallback !== undefined
+                  ? deleteBitListCallback
+                  : null
+              }
+            >
+              X
+            </button>
+          )}
 
-            <div className="input_wrapper">
-              <div className="label">Dec:</div>
-              <input
-                type="input"
-                name="dec_input"
-                value={decValue}
-                onChange={handleDecInputChange}
-              ></input>
-            </div>
-            <div className="input_wrapper">
-              <div className="label">Hex:</div>
-              <input
-                type="input"
-                name="hex_input"
-                value={hexValue}
-                className="hex_input"
-                disabled
-                readOnly
-              ></input>
-            </div>
-            <button onClick={deleteAllFromList}>
-              <FontAwesomeIcon icon={faTrashCan} />
-            </button>
-            <button onClick={copyAllFromListToClipboard}>
-              <FontAwesomeIcon icon={faCopy} />
-            </button>
-            <button onClick={() => invert(0, bitString.length)}>
-              <FontAwesomeIcon icon={faRepeat} />
-            </button>
-            <div className={`fillerBox box ${fill ? "" : "grey"}`}>
-              <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
-
-              <input
-                name="fill"
-                type="checkbox"
-                checked={fill}
-                onChange={handleFillChange}
-              />
-              <Dropdown
-                options={["0", "1"]}
-                value={fillWith}
-                onChange={handleFillWithChange}
-                disabled={!fill}
-                className="dropdown"
-                controlClassName="dropdown_control"
-                menuClassName="dropdown_menu"
-                placeholderClassName="dropdown_placeholder"
-              ></Dropdown>
-            </div>
-            <div className={`fillerBox box`}>
-              <FontAwesomeIcon icon={faICursor} />
-              <input
-                name="sticky"
-                type="checkbox"
-                checked={stickyCursor}
-                onChange={handleStickyCursorChange}
-              />
-            </div>
-          </>
-        </div>
-        <div
-          id={`bitlist_box_area_${areaId}`}
-          className={classNames({
-            bitbox: true,
-            input_extended: inputBitString.length > 0,
-          })}
-        >
-          {renderInputBitsFiller()}
-          <div
-            className="input_bitstring_cell"
-            style={{
-              gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
-            }}
-          >
-            {renderInputBits()}
-          </div>
-          {renderFillerBits()}
-          <div
-            className="bit_section"
-            style={{
-              gridColumnEnd: `span ${getBitSectionFillAmount()}`,
-            }}
-          >
-            {renderBits()}
+          <div className="input_wrapper">
+            <div className="label">Dec:</div>
             <input
-              type="text"
-              className="bit_input_field"
-              onChange={handleBitInputChange}
-              onKeyDown={bit_input_bin_checker}
-              onSelect={handleSelect}
-              ref={bitInputRef}
-              value={bitString}
+              type="input"
+              name="dec_input"
+              value={decValue}
+              onChange={handleDecInputChange}
             ></input>
           </div>
-          {renderBitNumbers()}
-          {renderByteRulers()}
-          {renderByteValues()}
-          {renderByteButtons()}
-        </div>
+          <div className="input_wrapper">
+            <div className="label">Hex:</div>
+            <input
+              type="input"
+              name="hex_input"
+              value={hexValue}
+              className="hex_input"
+              disabled
+              readOnly
+            ></input>
+          </div>
+          <button onClick={deleteAllFromList}>
+            <FontAwesomeIcon icon={faTrashCan} />
+          </button>
+          <button onClick={copyAllFromListToClipboard}>
+            <FontAwesomeIcon icon={faCopy} />
+          </button>
+          <button onClick={() => invert(0, bitString.length)}>
+            <FontAwesomeIcon icon={faRepeat} />
+          </button>
+          <div className={`fillerBox box ${fill ? "" : "grey"}`}>
+            <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
+
+            <input
+              name="fill"
+              type="checkbox"
+              checked={fill}
+              onChange={handleFillChange}
+            />
+            <Dropdown
+              options={["0", "1"]}
+              value={fillWith}
+              onChange={handleFillWithChange}
+              disabled={!fill}
+              className="dropdown"
+              controlClassName="dropdown_control"
+              menuClassName="dropdown_menu"
+              placeholderClassName="dropdown_placeholder"
+            ></Dropdown>
+          </div>
+          <div className={`fillerBox box`}>
+            <FontAwesomeIcon icon={faICursor} />
+            <input
+              name="sticky"
+              type="checkbox"
+              checked={stickyCursor}
+              onChange={handleStickyCursorChange}
+            />
+          </div>
+        </>
       </div>
-    </>
+      <div
+        id={`bitlist_box_area_${areaId}`}
+        className={classNames({
+          bitbox: true,
+          input_extended: inputBitString.length > 0,
+        })}
+      >
+        {renderInputBitsFiller()}
+        <div
+          className="input_bitstring_cell"
+          style={{
+            gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
+          }}
+        >
+          {renderInputBits()}
+        </div>
+        {renderFillerBits()}
+        <div
+          className="bit_section"
+          style={{
+            gridColumnEnd: `span ${getBitSectionFillAmount()}`,
+          }}
+        >
+          {renderBits()}
+          <input
+            type="text"
+            className="bit_input_field"
+            onChange={handleBitInputChange}
+            onKeyDown={bit_input_bin_checker}
+            onSelect={handleSelect}
+            ref={bitInputRef}
+            value={bitString}
+          ></input>
+        </div>
+        {renderBitNumbers()}
+        {renderByteRulers()}
+        {renderByteValues()}
+        {renderByteButtons()}
+      </div>
+    </div>
   );
 });
 

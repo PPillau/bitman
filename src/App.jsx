@@ -6,16 +6,17 @@ import Dropdown from "react-dropdown";
 import { useState, useCallback, createRef, useRef, useEffect } from "react";
 
 const App = () => {
+  const ref = useRef();
   const [lists, setLists] = useState([0]);
-  const [refs, setRefs] = useState([]);
+  const firstElement = <BitList fillWith="0" key={0} ref={ref} />;
+  // const [refs, setRefs] = useState([]);
 
-  useEffect(() => {
-    setRefs((oldRefs) =>
-      Array(lists.length)
-        .fill()
-        .map((_, i) => oldRefs[i] || createRef())
-    );
-  }, [lists.length]);
+  // const addToRefs = (el) => {
+  //   console.log(el, "FFF");
+  //   if (el && !refs.current.includes(el)) {
+  //     refs.current.push(el);
+  //   }
+  // };
 
   const addNewBitList = useCallback(() => {
     setLists([...lists, 0]);
@@ -32,7 +33,7 @@ const App = () => {
     <>
       {lists.map((list, i) => {
         if (i === 0) {
-          return <BitList fillWith="0" key={i} ref={refs[i]} />;
+          return firstElement;
         } else {
           return (
             <BitList
@@ -40,8 +41,7 @@ const App = () => {
               key={i}
               deleteBitListCallback={() => deleteBitList(i)}
               isDeletable={true}
-              ref={refs[i]}
-              // inputBitString={refs[0].current.getBitStringRef()}
+              inputBitString={ref.current.getBitStringRef()}
             />
           );
         }
