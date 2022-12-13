@@ -448,16 +448,20 @@ const BitList = forwardRef((props, ref) => {
 
   const bitwiseOperation = useCallback(() => {
     let result = "";
+    const actualBitString = getBitString(fill, fillWith);
     switch (bitOperation) {
       case OPERATIONS.AND:
         result = (
-          parseInt(inputBitString, 2) &
-          parseInt(getBitString(fill, fillWith), 2)
+          parseInt(inputBitString, 2) & parseInt(actualBitString, 2)
+        ).toString(2);
+      case OPERATIONS.OR:
+        result = (
+          parseInt(inputBitString, 2) | parseInt(actualBitString, 2)
         ).toString(2);
     }
 
-    return result.padStart(bitString.length, "0");
-  }, [bitOperation, bitString]);
+    return result.padStart(actualBitString.length, "0");
+  }, [bitOperation, bitString, inputBitString, fill, fillWith]);
 
   /* ----------------- END helper methods ----------------- */
 
@@ -532,7 +536,16 @@ const BitList = forwardRef((props, ref) => {
         counter++;
       }
 
-      return renderFillerBitsResult;
+      return (
+        <div
+          className="bit_section"
+          style={{
+            gridColumnEnd: `span ${fillAmount * 5}`,
+          }}
+        >
+          {renderFillerBitsResult}
+        </div>
+      );
     }
 
     if (fillAmount !== 8) {
@@ -632,7 +645,7 @@ const BitList = forwardRef((props, ref) => {
     const renderBitOperationResult = [];
 
     if (actualBitString.length !== inputBitString.length) {
-      const length = getBitStringFullLength(false) / 5;
+      const length = getBitStringFullLength(fill) / 5;
       for (let i = 0; i < length; i++) {
         renderBitOperationResult.push(
           <Bit type="4" key={i}>
@@ -642,7 +655,7 @@ const BitList = forwardRef((props, ref) => {
       }
     } else {
       //The actual magic
-      const operationResult = bitwiseOperation();
+      const operationResult = bitwiseOperation(bitString, inputBitString);
       for (let i = 0; i < operationResult.length; i++) {
         renderBitOperationResult.push(
           <Bit type="4" key={i}>
@@ -917,7 +930,7 @@ const BitList = forwardRef((props, ref) => {
             <div
               className="operation_bit_section"
               style={{
-                gridColumnEnd: `span ${getBitStringFullLength(false)}`,
+                gridColumnEnd: `span ${getBitStringFullLength(fill)}`,
               }}
             >
               {renderBitOperationResult()}
