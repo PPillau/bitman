@@ -454,10 +454,12 @@ const BitList = forwardRef((props, ref) => {
         result = (
           parseInt(inputBitString, 2) & parseInt(actualBitString, 2)
         ).toString(2);
+        break;
       case OPERATIONS.OR:
         result = (
           parseInt(inputBitString, 2) | parseInt(actualBitString, 2)
         ).toString(2);
+        break;
     }
 
     return result.padStart(actualBitString.length, "0");
