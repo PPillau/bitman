@@ -74,6 +74,7 @@ const BitList = forwardRef((props, ref) => {
   /* --- START getters --- */
   const getBitString = useCallback(
     (filled, filler = "") => {
+      //TODO: use the new filler logic from the bitfiller (concerning inputstring longer than bitstring) and use this for byte-rulers, byte-vals and byte-buttons
       if (filled && filler !== "" && bitString.length > 0) {
         const fillAmount = 8 - (refBitString.current.length % 8);
 
@@ -145,13 +146,22 @@ const BitList = forwardRef((props, ref) => {
     return (Math.floor(byteAmount) * 8 + fillAmount) * 5;
   };
 
-  const getBitStringFullLength = (shouldFill = true) => {
-    return (
-      Math.max(
-        getBitString(shouldFill, fillWith).length,
-        inputBitString.length
-      ) * 5
+  const getBiggerOfBothString = (shouldFill = true) => {
+    return Math.max(
+      getBitString(shouldFill, fillWith).length,
+      inputBitString.length
     );
+  };
+
+  const getSmallerOfBothString = (shouldFill = true) => {
+    return Math.min(
+      getBitString(shouldFill, fillWith).length,
+      inputBitString.length
+    );
+  };
+
+  const getLengthRoundedToNextByte = (length) => {
+    return Math.ceil(length / 8) * 8;
   };
 
   /* --- END getters --- */
@@ -512,49 +522,123 @@ const BitList = forwardRef((props, ref) => {
   /* ----------------- START render methods ----------------- */
 
   const renderFillerBits = () => {
-    const fillAmount = 8 - (refBitString.current.length % 8);
-
-    if (fillWith !== "" && fill) {
-      let counter = refBitString.current.length * 2 - 1;
-      const renderFillerBitsResult = [];
-
-      if (fillAmount === 8) {
-        return;
-      }
-
-      for (let i = 0; i < fillAmount; i++) {
-        const bitElem = (
-          <Bit
-            id={` bitElement_${counter}`}
-            className="bit_cell"
-            key={counter}
-            index={-1}
-            type="2"
-          >
-            {fillWith}
-          </Bit>
-        );
-        renderFillerBitsResult.push(bitElem);
-        counter++;
-      }
-
-      return (
-        <div
-          className="bit_section"
-          style={{
-            gridColumnEnd: `span ${fillAmount * 5}`,
-          }}
-        >
-          {renderFillerBitsResult}
-        </div>
+    if (refBitString.current.length === 0) {
+      return "";
+    }
+    if (refBitString.current.length > inputBitString.length) {
+      const fillAmount = getBiggerOfBothString(false);
+      const roundedFillAmount = getLengthRoundedToNextByte(
+        getBiggerOfBothString(fill)
       );
-    }
+      const difference = roundedFillAmount - fillAmount;
 
-    if (fillAmount !== 8) {
-      return <div className={`bit_cell filler_${fillAmount}`}></div>;
-    }
+      if (fillWith !== "" && fill) {
+        //Filling YES
+        if (difference === 8 || difference === 0) {
+          return "";
+        }
 
-    return "";
+        let counter = refBitString.current.length * 2 - 1;
+        const renderFillerBitsResult = [];
+
+        for (let i = 0; i < difference; i++) {
+          const bitElem = (
+            <Bit
+              id={` bitElement_${counter}`}
+              className="bit_cell"
+              key={counter}
+              index={-1}
+              type="2"
+            >
+              {fillWith}
+            </Bit>
+          );
+          renderFillerBitsResult.push(bitElem);
+          counter++;
+        }
+
+        return (
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${difference * 5}`,
+            }}
+          >
+            {renderFillerBitsResult}
+          </div>
+        );
+      } else {
+        //Filling NO
+
+        if (difference !== 8 && difference !== 0) {
+          return (
+            <div
+              className="bit_cell"
+              style={{
+                gridColumnEnd: `span ${difference * 5}`,
+              }}
+            ></div>
+          );
+        }
+      }
+    } else {
+      const fillAmount = getSmallerOfBothString(false);
+      const roundedFillAmount = getLengthRoundedToNextByte(
+        getBiggerOfBothString(false)
+      );
+      const difference = roundedFillAmount - fillAmount;
+      if (fillWith !== "" && fill) {
+        //Filling YES
+
+        if (difference === 0) {
+          return "";
+        }
+
+        let counter = refBitString.current.length * 2 - 1;
+        const renderFillerBitsResult = [];
+
+        for (let i = 0; i < difference; i++) {
+          const bitElem = (
+            <Bit
+              id={` bitElement_${counter}`}
+              className="bit_cell"
+              key={counter}
+              index={-1}
+              type="2"
+            >
+              {fillWith}
+            </Bit>
+          );
+          renderFillerBitsResult.push(bitElem);
+          counter++;
+        }
+
+        return (
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${difference * 5}`,
+            }}
+          >
+            {renderFillerBitsResult}
+          </div>
+        );
+      } else {
+        //Filling NO
+        if (difference === 0) {
+          return "";
+        }
+
+        return (
+          <div
+            className="bit_cell"
+            style={{
+              gridColumnEnd: `span ${difference * 5}`,
+            }}
+          ></div>
+        );
+      }
+    }
   };
 
   const renderInputBitsFiller = () => {
@@ -563,21 +647,66 @@ const BitList = forwardRef((props, ref) => {
     }
 
     const bitAmount = getInputBitSectionFillAmount() / 5;
-    let byteAmountRounded = Math.ceil(refBitString.current.length / 8);
+    let byteAmountRounded = Math.ceil(getBiggerOfBothString() / 8);
     if (byteAmountRounded <= 0) {
       byteAmountRounded = 1;
     }
 
     let fillAmount = byteAmountRounded * 8 - bitAmount;
 
-    return (
-      <div
-        className="input_bitstring_filler_cell"
-        style={{
-          gridColumnEnd: `span ${fillAmount * 5}`,
-        }}
-      ></div>
-    );
+    if (fillAmount > 0) {
+      return (
+        <div
+          className="input_bitstring_filler_cell"
+          style={{
+            gridColumnEnd: `span ${fillAmount * 5}`,
+          }}
+        ></div>
+      );
+    }
+    return "";
+  };
+
+  const renderResultBitsFiller = () => {
+    if (inputBitString.length === 0) {
+      return "";
+    }
+
+    const fillAmount = getBiggerOfBothString(fill);
+    const roundedFillAmount = getLengthRoundedToNextByte(fillAmount);
+    const difference = roundedFillAmount - fillAmount;
+
+    if (difference > 0) {
+      return (
+        <div
+          className="operation_bit_section"
+          style={{
+            gridColumnEnd: `span ${difference * 5}`,
+          }}
+        ></div>
+      );
+    } else {
+      return "";
+    }
+  };
+
+  const renderBitNumbersFiller = () => {
+    const fillAmount = getBiggerOfBothString(fill);
+    const roundedFillAmount = getLengthRoundedToNextByte(fillAmount);
+    const difference = roundedFillAmount - fillAmount;
+
+    if (difference > 0) {
+      return (
+        <div
+          className="cell bit_number_cell bit_number bit_number_invisible"
+          style={{
+            gridColumnEnd: `span ${difference * 5}`,
+          }}
+        ></div>
+      );
+    } else {
+      return "";
+    }
   };
 
   const renderBits = () => {
@@ -647,7 +776,7 @@ const BitList = forwardRef((props, ref) => {
     const renderBitOperationResult = [];
 
     if (actualBitString.length !== inputBitString.length) {
-      const length = getBitStringFullLength(fill) / 5;
+      const length = getBiggerOfBothString(fill);
       for (let i = 0; i < length; i++) {
         renderBitOperationResult.push(
           <Bit type="4" key={i}>
@@ -675,15 +804,18 @@ const BitList = forwardRef((props, ref) => {
     const renderBitNumbersResult = [];
 
     if (inputBitString.length > 0) {
-      let counter = getBitStringFullLength() / 5;
-      for (let i = 0; i < getBitStringFullLength() / 5; i++) {
+      renderBitNumbersResult.push(renderBitNumbersFiller());
+
+      let counter = getBiggerOfBothString(fill);
+      for (let i = 0; i < getBiggerOfBothString(fill); i++) {
         renderBitNumbersResult.push(
-          <div className="cell bit_number_cell bit_number" key={i}>
+          <div className="cell bit_number_cell bit_number " key={i}>
             {counter}
           </div>
         );
         counter--;
       }
+
       return renderBitNumbersResult;
     }
 
@@ -708,9 +840,13 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteRulers = () => {
     const renderByteRulersResult = [];
-    let counter = Math.ceil(refBitString.current.length / 8);
+    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
 
-    for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+    for (
+      let i = 0;
+      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i++
+    ) {
       renderByteRulersResult.push(
         <div className="cell byte_ruler byte_ruler_cell" key={i}>
           <span className="byte_label">Byte {counter}</span>
@@ -724,9 +860,13 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteValues = () => {
     const renderByteValuesResult = [];
-    let counter = Math.ceil(refBitString.current.length / 8);
+    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
 
-    for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+    for (
+      let i = 0;
+      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i++
+    ) {
       let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
 
       renderByteValuesResult.push(
@@ -757,9 +897,13 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteButtons = () => {
     const renderByteButtonsResult = [];
-    let counter = Math.ceil(refBitString.current.length / 8);
+    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
 
-    for (let i = 0; i < Math.ceil(refBitString.current.length / 8); i++) {
+    for (
+      let i = 0;
+      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i++
+    ) {
       let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
 
       renderByteButtonsResult.push(
@@ -895,6 +1039,8 @@ const BitList = forwardRef((props, ref) => {
           input_extended: inputBitString.length > 0,
         })}
       >
+        {renderInputBitsFiller()}
+
         <div
           className="input_bitstring_cell"
           style={{
@@ -926,13 +1072,16 @@ const BitList = forwardRef((props, ref) => {
             <div
               className="operation_results_separator"
               style={{
-                gridColumnEnd: `span ${getBitStringFullLength()}`,
+                gridColumnEnd: `span ${
+                  getLengthRoundedToNextByte(getBiggerOfBothString()) * 5
+                }`,
               }}
-            ></div>{" "}
+            ></div>
+            {renderResultBitsFiller()}
             <div
               className="operation_bit_section"
               style={{
-                gridColumnEnd: `span ${getBitStringFullLength(fill)}`,
+                gridColumnEnd: `span ${getBiggerOfBothString(fill) * 5}`,
               }}
             >
               {renderBitOperationResult()}

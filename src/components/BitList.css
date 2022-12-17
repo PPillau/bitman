@@ -164,6 +164,16 @@
   top: 0;
 }
 
+.bit_number_invisible:before {
+  content: "";
+  border: unset;
+  width: unset;
+  height: unset;
+  position: unset;
+  left: unset;
+  top: unset;
+}
+
 .f.bit_number::before {
   display: none;
 }
