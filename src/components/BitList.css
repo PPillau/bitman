@@ -369,3 +369,34 @@
   width: 100%;
   z-index: 3;
 }
+
+.operations_dropdown {
+  position: relative;
+  z-index: 10;
+  background-color: rgb(36, 36, 36);
+  width: 150px;
+  height: 45px;
+  border-radius: 5px;
+  color: white;
+  font-size: 1.3rem;
+  border: 1px solid rgb(36, 36, 36);
+}
+
+.operations_dropdown_control {
+}
+
+.operations_dropdown_menu {
+  background-color: white;
+  color: black;
+  border: 1px solid rgb(36, 36, 36);
+}
+
+.operations_dropdown_menu div {
+  height: 1.5rem;
+  padding: 10px 5px;
+}
+
+.operations_dropdown_placeholder {
+  height: 1.5rem;
+  padding: 10px 5px;
+}

@@ -4,6 +4,7 @@ import {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  Fragment,
 } from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
@@ -45,6 +46,7 @@ const BitList = forwardRef((props, ref) => {
     isDeletable = false,
     updateCallback = undefined,
     inputBitOperation = OPERATIONS.AND,
+    actualKey,
   } = props;
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState("");
@@ -74,12 +76,19 @@ const BitList = forwardRef((props, ref) => {
   /* --- START getters --- */
   const getBitString = useCallback(
     (filled, filler = "") => {
-      //TODO: use the new filler logic from the bitfiller (concerning inputstring longer than bitstring) and use this for byte-rulers, byte-vals and byte-buttons
       if (filled && filler !== "" && bitString.length > 0) {
-        const fillAmount = 8 - (refBitString.current.length % 8);
+        let fillAmount;
 
-        if (fillAmount === 8) {
-          return bitString;
+        if (inputBitString.length > bitString.length) {
+          fillAmount = inputBitString.length - bitString.length;
+        } else {
+          const bitAmountRounded = Math.ceil(bitString.length / 8) * 8;
+
+          fillAmount = bitAmountRounded - bitString.length;
+
+          if (fillAmount === 8) {
+            return bitString;
+          }
         }
 
         return _.padStart(bitString, bitString.length + fillAmount, filler);
@@ -87,7 +96,7 @@ const BitList = forwardRef((props, ref) => {
         return bitString;
       }
     },
-    [bitString]
+    [bitString, inputBitString]
   );
 
   const getByteStartPosition = useCallback(
@@ -113,9 +122,15 @@ const BitList = forwardRef((props, ref) => {
   }, [bitString]);
 
   const getByte = (pos, withFiller = true, filler = "") => {
-    const actualBitString = getBitString(withFiller, filler);
+    let actualBitString = getBitString(withFiller, filler);
     if (Math.ceil(actualBitString.length / 8) < pos) {
       return "";
+    } else if (actualBitString.length % 8 !== 0) {
+      actualBitString = _.padStart(
+        actualBitString,
+        Math.ceil(actualBitString.length / 8) * 8,
+        filler
+      );
     }
 
     let cropStart = 0;
@@ -285,6 +300,13 @@ const BitList = forwardRef((props, ref) => {
     [setFillWith]
   );
 
+  const handleOperationChange = useCallback(
+    (option) => {
+      setBitOperation(OPERATIONS[option.value]);
+    },
+    [setBitOperation]
+  );
+
   const handleDecTextChange = useCallback(
     (e) => {
       setDecValue(formatDecimal(e.target.value));
@@ -367,21 +389,21 @@ const BitList = forwardRef((props, ref) => {
   };
 
   const getHexValue = (input = getBitString(true), shouldFill) => {
-    if (!shouldFill && input.length !== 8) {
+    if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
     return getSafeOutput(parseInt(input, 2).toString(16));
   };
 
   const getOctValue = (input = getBitString(true), shouldFill) => {
-    if (!shouldFill && input.length !== 8) {
+    if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
     return getSafeOutput(parseInt(input, 2).toString(8));
   };
 
   const getDecValue = (input = getBitString(true), shouldFill) => {
-    if (!shouldFill && input.length !== 8) {
+    if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
     return getSafeOutput(parseInt(input, 2).toString(10));
@@ -522,123 +544,59 @@ const BitList = forwardRef((props, ref) => {
   /* ----------------- START render methods ----------------- */
 
   const renderFillerBits = () => {
-    if (refBitString.current.length === 0) {
+    const filledString = getBitString(true, fillWith);
+    const normalString = getBitString(false, fillWith);
+    let fillDifference = filledString.length - normalString.length;
+    let completeDifference =
+      Math.ceil(filledString.length / 8) * 8 - filledString.length;
+
+    if (bitString.length === 0 || fillDifference <= 0) {
       return "";
     }
-    if (refBitString.current.length > inputBitString.length) {
-      const fillAmount = getBiggerOfBothString(false);
-      const roundedFillAmount = getLengthRoundedToNextByte(
-        getBiggerOfBothString(fill)
-      );
-      const difference = roundedFillAmount - fillAmount;
 
-      if (fillWith !== "" && fill) {
-        //Filling YES
-        if (difference === 8 || difference === 0) {
-          return "";
-        }
+    let counter = refBitString.current.length * 2 - 1;
+    const renderFillerBitsResult = [];
 
-        let counter = refBitString.current.length * 2 - 1;
-        const renderFillerBitsResult = [];
-
-        for (let i = 0; i < difference; i++) {
-          const bitElem = (
-            <Bit
-              id={` bitElement_${counter}`}
-              className="bit_cell"
-              key={counter}
-              index={-1}
-              type="2"
-            >
-              {fillWith}
-            </Bit>
-          );
-          renderFillerBitsResult.push(bitElem);
-          counter++;
-        }
-
-        return (
-          <div
-            className="bit_section"
-            style={{
-              gridColumnEnd: `span ${difference * 5}`,
-            }}
-          >
-            {renderFillerBitsResult}
-          </div>
-        );
-      } else {
-        //Filling NO
-
-        if (difference !== 8 && difference !== 0) {
-          return (
-            <div
-              className="bit_cell"
-              style={{
-                gridColumnEnd: `span ${difference * 5}`,
-              }}
-            ></div>
-          );
-        }
-      }
-    } else {
-      const fillAmount = getSmallerOfBothString(false);
-      const roundedFillAmount = getLengthRoundedToNextByte(
-        getBiggerOfBothString(false)
-      );
-      const difference = roundedFillAmount - fillAmount;
-      if (fillWith !== "" && fill) {
-        //Filling YES
-
-        if (difference === 0) {
-          return "";
-        }
-
-        let counter = refBitString.current.length * 2 - 1;
-        const renderFillerBitsResult = [];
-
-        for (let i = 0; i < difference; i++) {
-          const bitElem = (
-            <Bit
-              id={` bitElement_${counter}`}
-              className="bit_cell"
-              key={counter}
-              index={-1}
-              type="2"
-            >
-              {fillWith}
-            </Bit>
-          );
-          renderFillerBitsResult.push(bitElem);
-          counter++;
-        }
-
-        return (
-          <div
-            className="bit_section"
-            style={{
-              gridColumnEnd: `span ${difference * 5}`,
-            }}
-          >
-            {renderFillerBitsResult}
-          </div>
-        );
-      } else {
-        //Filling NO
-        if (difference === 0) {
-          return "";
-        }
-
-        return (
-          <div
+    if (fillDifference > 0 && fill) {
+      for (let i = 0; i < fillDifference; i++) {
+        const bitElem = (
+          <Bit
+            id={` bitElement_${counter}`}
             className="bit_cell"
-            style={{
-              gridColumnEnd: `span ${difference * 5}`,
-            }}
-          ></div>
+            key={counter}
+            index={-1}
+            type="2"
+          >
+            {fillWith}
+          </Bit>
         );
+        renderFillerBitsResult.push(bitElem);
+        counter++;
       }
     }
+
+    return (
+      <>
+        {completeDifference > 0 && (
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${completeDifference * 5}`,
+            }}
+          ></div>
+        )}
+        {fillDifference > 0 && (
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${fillDifference * 5}`,
+            }}
+          >
+            {renderFillerBitsResult}
+          </div>
+        )}
+      </>
+    );
   };
 
   const renderInputBitsFiller = () => {
@@ -840,11 +798,11 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteRulers = () => {
     const renderByteRulersResult = [];
-    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
+    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
 
     for (
       let i = 0;
-      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i < Math.ceil(getBitString(true, fillWith).length / 8);
       i++
     ) {
       renderByteRulersResult.push(
@@ -860,14 +818,15 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteValues = () => {
     const renderByteValuesResult = [];
-    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
+    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
 
     for (
       let i = 0;
-      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i < Math.ceil(getBitString(true, fillWith).length / 8);
       i++
     ) {
-      let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
+      let byteNumber =
+        Math.ceil(getBitString(true, fillWith).length / 8) - counter;
 
       renderByteValuesResult.push(
         <div className="cell byte_values byte_values_cell" key={i}>
@@ -897,11 +856,11 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteButtons = () => {
     const renderByteButtonsResult = [];
-    let counter = Math.ceil(getBitString(fill, fillWith).length / 8);
+    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
 
     for (
       let i = 0;
-      i < Math.ceil(getBitString(fill, fillWith).length / 8);
+      i < Math.ceil(getBitString(true, fillWith).length / 8);
       i++
     ) {
       let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
@@ -957,143 +916,156 @@ const BitList = forwardRef((props, ref) => {
   /* ----------------- END render methods ----------------- */
 
   return (
-    <div className="bitlist" id={`bitlist_area_${areaId}`} ref={ref}>
-      <div className="button_area">
-        <>
-          {isDeletable && (
-            <button
-              onClick={
-                deleteBitListCallback !== undefined
-                  ? deleteBitListCallback
-                  : null
-              }
-            >
-              X
-            </button>
-          )}
-
-          <div className="input_wrapper">
-            <div className="label">Dec:</div>
-            <input
-              type="input"
-              name="dec_input"
-              value={decValue}
-              onChange={handleDecInputChange}
-            ></input>
-          </div>
-          <div className="input_wrapper">
-            <div className="label">Hex:</div>
-            <input
-              type="input"
-              name="hex_input"
-              value={hexValue}
-              className="hex_input"
-              disabled
-              readOnly
-            ></input>
-          </div>
-          <button onClick={deleteAllFromList}>
-            <FontAwesomeIcon icon={faTrashCan} />
-          </button>
-          <button onClick={copyAllFromListToClipboard}>
-            <FontAwesomeIcon icon={faCopy} />
-          </button>
-          <button onClick={() => invert(0, bitString.length)}>
-            <FontAwesomeIcon icon={faRepeat} />
-          </button>
-          <div className={`fillerBox box ${fill ? "" : "grey"}`}>
-            <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
-
-            <input
-              name="fill"
-              type="checkbox"
-              checked={fill}
-              onChange={handleFillChange}
-            />
-            <Dropdown
-              options={["0", "1"]}
-              value={fillWith}
-              onChange={handleFillWithChange}
-              disabled={!fill}
-              className="dropdown"
-              controlClassName="dropdown_control"
-              menuClassName="dropdown_menu"
-              placeholderClassName="dropdown_placeholder"
-            ></Dropdown>
-          </div>
-          <div className={`fillerBox box`}>
-            <FontAwesomeIcon icon={faICursor} />
-            <input
-              name="sticky"
-              type="checkbox"
-              checked={stickyCursor}
-              onChange={handleStickyCursorChange}
-            />
-          </div>
-        </>
-      </div>
-      <div
-        id={`bitlist_box_area_${areaId}`}
-        className={classNames({
-          bitbox: true,
-          input_extended: inputBitString.length > 0,
-        })}
-      >
-        {renderInputBitsFiller()}
-
-        <div
-          className="input_bitstring_cell"
-          style={{
-            gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
-          }}
-        >
-          {renderInputBits()}
-        </div>
-        {renderFillerBits()}
-        <div
-          className="bit_section"
-          style={{
-            gridColumnEnd: `span ${getBitSectionFillAmount()}`,
-          }}
-        >
-          {renderBits()}
-          <input
-            type="text"
-            className="bit_input_field"
-            onChange={handleBitInputChange}
-            onKeyDown={bit_input_bin_checker}
-            onSelect={handleSelect}
-            ref={bitInputRef}
-            value={bitString}
-          ></input>
-        </div>
-        {inputBitString.length > 0 && (
+    <Fragment key={actualKey}>
+      <div className="bitlist" id={`bitlist_area_${areaId}`} ref={ref}>
+        <div className="button_area">
           <>
-            <div
-              className="operation_results_separator"
-              style={{
-                gridColumnEnd: `span ${
-                  getLengthRoundedToNextByte(getBiggerOfBothString()) * 5
-                }`,
-              }}
-            ></div>
-            {renderResultBitsFiller()}
-            <div
-              className="operation_bit_section"
-              style={{
-                gridColumnEnd: `span ${getBiggerOfBothString(fill) * 5}`,
-              }}
-            >
-              {renderBitOperationResult()}
+            {isDeletable && (
+              <>
+                <button
+                  onClick={
+                    deleteBitListCallback !== undefined
+                      ? deleteBitListCallback
+                      : null
+                  }
+                >
+                  X
+                </button>
+                <Dropdown
+                  value={Object.keys(OPERATIONS)[0]}
+                  className="operations_dropdown"
+                  controlClassName="operations_dropdown_control"
+                  menuClassName="operations_dropdown_menu"
+                  placeholderClassName="operations_dropdown_placeholder"
+                  options={Object.keys(OPERATIONS)}
+                  onChange={handleOperationChange}
+                ></Dropdown>
+              </>
+            )}
+
+            <div className="input_wrapper">
+              <div className="label">Dec:</div>
+              <input
+                type="input"
+                name="dec_input"
+                value={decValue}
+                onChange={handleDecInputChange}
+              ></input>
+            </div>
+            <div className="input_wrapper">
+              <div className="label">Hex:</div>
+              <input
+                type="input"
+                name="hex_input"
+                value={hexValue}
+                className="hex_input"
+                disabled
+                readOnly
+              ></input>
+            </div>
+            <button onClick={deleteAllFromList}>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+            <button onClick={copyAllFromListToClipboard}>
+              <FontAwesomeIcon icon={faCopy} />
+            </button>
+            <button onClick={() => invert(0, bitString.length)}>
+              <FontAwesomeIcon icon={faRepeat} />
+            </button>
+            <div className={`fillerBox box ${fill ? "" : "grey"}`}>
+              <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
+
+              <input
+                name="fill"
+                type="checkbox"
+                checked={fill}
+                onChange={handleFillChange}
+              />
+              <Dropdown
+                options={["0", "1"]}
+                value={fillWith}
+                onChange={handleFillWithChange}
+                disabled={!fill}
+                className="dropdown"
+                controlClassName="dropdown_control"
+                menuClassName="dropdown_menu"
+                placeholderClassName="dropdown_placeholder"
+              ></Dropdown>
+            </div>
+            <div className={`fillerBox box`}>
+              <FontAwesomeIcon icon={faICursor} />
+              <input
+                name="sticky"
+                type="checkbox"
+                checked={stickyCursor}
+                onChange={handleStickyCursorChange}
+              />
             </div>
           </>
-        )}
-        {renderBitNumbers()}
-        {renderByteRulers()}
-        {renderByteValues()}
-        {renderByteButtons()}
+        </div>
+        <div
+          id={`bitlist_box_area_${areaId}`}
+          className={classNames({
+            bitbox: true,
+            input_extended: inputBitString.length > 0,
+          })}
+        >
+          {renderInputBitsFiller()}
+
+          <div
+            className="input_bitstring_cell"
+            style={{
+              gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
+            }}
+          >
+            {renderInputBits()}
+          </div>
+          {renderFillerBits()}
+          <div
+            className="bit_section"
+            style={{
+              gridColumnEnd: `span ${getBitSectionFillAmount()}`,
+            }}
+          >
+            {renderBits()}
+            <input
+              type="text"
+              className="bit_input_field"
+              onChange={handleBitInputChange}
+              onKeyDown={bit_input_bin_checker}
+              onSelect={handleSelect}
+              ref={bitInputRef}
+              value={bitString}
+            ></input>
+          </div>
+          {inputBitString.length > 0 && (
+            <>
+              <div
+                className="operation_results_separator"
+                style={{
+                  gridColumnEnd: `span ${
+                    getLengthRoundedToNextByte(getBiggerOfBothString()) * 5
+                  }`,
+                }}
+              ></div>
+              {renderResultBitsFiller()}
+              <div
+                className="operation_bit_section"
+                style={{
+                  gridColumnEnd: `span ${getBiggerOfBothString(fill) * 5}`,
+                }}
+              >
+                {renderBitOperationResult()}
+              </div>
+            </>
+          )}
+          {renderBitNumbers()}
+          {renderByteRulers()}
+          {renderByteValues()}
+          {renderByteButtons()}
+        </div>
       </div>
-    </div>
+    </Fragment>
   );
 });
 
