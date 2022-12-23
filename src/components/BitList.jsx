@@ -100,8 +100,8 @@ const BitList = forwardRef((props, ref) => {
   );
 
   const getByteStartPosition = useCallback(
-    (byteNumber) => {
-      const unfinished = bitString.length % 8;
+    (byteNumber, actualBitString) => {
+      const unfinished = actualBitString.length % 8;
       const lateStart = unfinished > 0 ? -1 : 0;
 
       return byteNumber === 0 ? 0 : unfinished + (byteNumber + lateStart) * 8;
@@ -109,40 +109,32 @@ const BitList = forwardRef((props, ref) => {
     [bitString]
   );
 
-  const getByteEndPosition = (byteNumber) => {
-    const earlyEnd = getWrappedAroundUnfinished();
+  const getByteEndPosition = (byteNumber, actualBitString) => {
+    const earlyEnd = getWrappedAroundUnfinished(actualBitString);
 
     return earlyEnd + 8 * byteNumber;
   };
 
-  const getWrappedAroundUnfinished = useCallback(() => {
-    const unfinished = bitString.length % 8;
+  const getWrappedAroundUnfinished = useCallback(
+    (actualBitString) => {
+      const unfinished = actualBitString.length % 8;
 
-    return unfinished === 0 ? 8 : unfinished;
-  }, [bitString]);
+      return unfinished === 0 ? 8 : unfinished;
+    },
+    [bitString]
+  );
 
   const getByte = (pos, withFiller = true, filler = "") => {
     let actualBitString = getBitString(withFiller, filler);
     if (Math.ceil(actualBitString.length / 8) < pos) {
       return "";
-    } else if (actualBitString.length % 8 !== 0) {
-      actualBitString = _.padStart(
-        actualBitString,
-        Math.ceil(actualBitString.length / 8) * 8,
-        filler
-      );
     }
 
     let cropStart = 0;
     let cropEnd = 0;
 
-    if (withFiller) {
-      cropStart = pos * 8;
-      cropEnd = (pos + 1) * 8;
-    } else {
-      cropStart = getByteStartPosition(pos);
-      cropEnd = getByteEndPosition(pos);
-    }
+    cropStart = getByteStartPosition(pos, actualBitString);
+    cropEnd = getByteEndPosition(pos, actualBitString);
 
     return actualBitString.substring(cropStart, cropEnd);
   };
@@ -221,7 +213,10 @@ const BitList = forwardRef((props, ref) => {
         e.stopPropagation();
       }
 
-      let resultingBitString = bitString;
+      let resultingBitString = getBitString(true, fillWith);
+      let strippedBitString = getBitString(false, fillWith);
+      let clipped = false;
+
       const byteDirection = direction ? -1 : 1;
 
       const movedByte = getByte(byteNumber, fill, fillWith);
@@ -231,38 +226,60 @@ const BitList = forwardRef((props, ref) => {
         fillWith
       );
 
-      const movedByteStartPosition = getByteStartPosition(byteNumber);
+      const movedByteStartPosition = getByteStartPosition(
+        byteNumber,
+        getBitString(fill, fillWith)
+      );
       const replacementByteStartPosition = getByteStartPosition(
-        byteNumber + byteDirection
+        byteNumber + byteDirection,
+        getBitString(fill, fillWith)
       );
       const replacementdByteEndPosition = getByteEndPosition(
-        byteNumber + byteDirection
+        byteNumber + byteDirection,
+        getBitString(fill, fillWith)
       );
+
+      if (resultingBitString !== strippedBitString && fill) {
+        if (replacementByteStartPosition < movedByteStartPosition) {
+          resultingBitString = resultingBitString.substr(
+            replacementByteStartPosition,
+            resultingBitString.length
+          );
+        } else {
+          resultingBitString = resultingBitString.substr(
+            movedByteStartPosition,
+            resultingBitString.length
+          );
+        }
+        clipped = true;
+      }
 
       if (direction) {
         //move left
 
-        resultingBitString =
-          resultingBitString.substr(0, replacementByteStartPosition) +
-          movedByte +
-          replacementByte +
-          resultingBitString.substr(
-            replacementByteStartPosition +
-              movedByte.length +
-              replacementByte.length,
-            resultingBitString.length
-          );
+        resultingBitString = !clipped
+          ? resultingBitString.substr(0, replacementByteStartPosition)
+          : "" +
+            movedByte +
+            replacementByte +
+            resultingBitString.substr(
+              replacementByteStartPosition +
+                movedByte.length +
+                replacementByte.length,
+              resultingBitString.length
+            );
       } else {
         //move right
 
-        resultingBitString =
-          resultingBitString.substr(0, movedByteStartPosition) +
-          replacementByte +
-          movedByte +
-          resultingBitString.substr(
-            replacementdByteEndPosition,
-            resultingBitString.length
-          );
+        resultingBitString = !clipped
+          ? resultingBitString.substr(0, movedByteStartPosition)
+          : "" +
+            replacementByte +
+            movedByte +
+            resultingBitString.substr(
+              replacementdByteEndPosition,
+              resultingBitString.length
+            );
       }
 
       setBitString(resultingBitString);
@@ -388,21 +405,21 @@ const BitList = forwardRef((props, ref) => {
     return (dec >>> 0).toString(2);
   };
 
-  const getHexValue = (input = getBitString(true), shouldFill) => {
+  const getHexValue = (input = getBitString(true, fillWith), shouldFill) => {
     if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
     return getSafeOutput(parseInt(input, 2).toString(16));
   };
 
-  const getOctValue = (input = getBitString(true), shouldFill) => {
+  const getOctValue = (input = getBitString(true, fillWith), shouldFill) => {
     if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
     return getSafeOutput(parseInt(input, 2).toString(8));
   };
 
-  const getDecValue = (input = getBitString(true), shouldFill) => {
+  const getDecValue = (input = getBitString(true, fillWith), shouldFill) => {
     if ((!shouldFill && input.length !== 8) || input === "") {
       return "-";
     }
@@ -450,8 +467,18 @@ const BitList = forwardRef((props, ref) => {
   };
 
   const canByteMove = useCallback(
+    //direction: true = left / false = right
     (byteNumber, direction) => {
-      const unfinished = getBitString(false).length % 8;
+      //TODO: Finish this
+      const actualBitString = getBitString(fill, fillWith);
+      const strippedBitString = getBitString(false);
+
+      let unfinished;
+      if (actualBitString !== strippedBitString && fill) {
+        unfinished = actualBitString.length - strippedBitString.length;
+      } else {
+        unfinished = getBitString(false).length % 8;
+      }
       // const canMoveLeft = direction &&
       // (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0);
       // const canMoveRight = !direction &&
@@ -462,13 +489,14 @@ const BitList = forwardRef((props, ref) => {
 
       if (
         direction &&
-        (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0))
+        (byteNumber === 0 || (byteNumber === 1 && unfinished > 0))
       ) {
         return false;
       } else if (
         !direction &&
-        (Math.ceil(getBitString(true).length / 8) === byteNumber + 1 ||
-          (byteNumber === 0 && !fill && unfinished > 0))
+        (Math.ceil(getBitString(true, fillWith).length / 8) ===
+          byteNumber + 1 ||
+          (byteNumber === 0 && unfinished > 0))
       ) {
         return false;
       } else {
@@ -834,16 +862,16 @@ const BitList = forwardRef((props, ref) => {
             <div>
               <b>Hex: </b>
               <span className="hex_val">
-                {getHexValue(getByte(byteNumber, fill, fillWith), fill)}
+                {getHexValue(getByte(byteNumber, fill, fillWith), false)}
               </span>
             </div>
             <div>
               <b>Dec: </b>
-              {getDecValue(getByte(byteNumber, fill, fillWith), fill)}
+              {getDecValue(getByte(byteNumber, fill, fillWith), false)}
             </div>
             <div>
               <b>Oct: </b>
-              {getOctValue(getByte(byteNumber, fill, fillWith), fill)}
+              {getOctValue(getByte(byteNumber, fill, fillWith), false)}
             </div>
           </span>
         </div>
@@ -863,7 +891,8 @@ const BitList = forwardRef((props, ref) => {
       i < Math.ceil(getBitString(true, fillWith).length / 8);
       i++
     ) {
-      let byteNumber = Math.ceil(getBitString(true).length / 8) - counter;
+      let byteNumber =
+        Math.ceil(getBitString(true, fillWith).length / 8) - counter;
 
       renderByteButtonsResult.push(
         <div className="cell byte_buttons byte_buttons_cell" key={i}>
@@ -878,8 +907,11 @@ const BitList = forwardRef((props, ref) => {
             <button
               onClick={() =>
                 deleteFromListAt(
-                  getByteStartPosition(byteNumber),
-                  getByteEndPosition(byteNumber)
+                  getByteStartPosition(
+                    byteNumber,
+                    getBitString(fill, fillWith)
+                  ),
+                  getByteEndPosition(byteNumber, getBitString(fill, fillWith))
                 )
               }
             >
@@ -891,8 +923,11 @@ const BitList = forwardRef((props, ref) => {
             <button
               onClick={() =>
                 byteInvert(
-                  getByteStartPosition(byteNumber),
-                  getByteEndPosition(byteNumber)
+                  getByteStartPosition(
+                    byteNumber,
+                    getBitString(fill, fillWith)
+                  ),
+                  getByteEndPosition(byteNumber, getBitString(fill, fillWith))
                 )
               }
             >
