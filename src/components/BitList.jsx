@@ -257,29 +257,31 @@ const BitList = forwardRef((props, ref) => {
       if (direction) {
         //move left
 
-        resultingBitString = !clipped
-          ? resultingBitString.substr(0, replacementByteStartPosition)
-          : "" +
-            movedByte +
-            replacementByte +
-            resultingBitString.substr(
-              replacementByteStartPosition +
-                movedByte.length +
-                replacementByte.length,
-              resultingBitString.length
-            );
+        resultingBitString =
+          (!clipped
+            ? resultingBitString.substr(0, replacementByteStartPosition)
+            : "") +
+          movedByte +
+          replacementByte +
+          resultingBitString.substr(
+            replacementByteStartPosition +
+              movedByte.length +
+              replacementByte.length,
+            resultingBitString.length
+          );
       } else {
         //move right
 
-        resultingBitString = !clipped
-          ? resultingBitString.substr(0, movedByteStartPosition)
-          : "" +
-            replacementByte +
-            movedByte +
-            resultingBitString.substr(
-              replacementdByteEndPosition,
-              resultingBitString.length
-            );
+        resultingBitString =
+          (!clipped
+            ? resultingBitString.substr(0, movedByteStartPosition)
+            : "") +
+          replacementByte +
+          movedByte +
+          resultingBitString.substr(
+            replacementdByteEndPosition,
+            resultingBitString.length
+          );
       }
 
       setBitString(resultingBitString);
@@ -474,11 +476,8 @@ const BitList = forwardRef((props, ref) => {
       const strippedBitString = getBitString(false);
 
       let unfinished;
-      if (actualBitString !== strippedBitString && fill) {
-        unfinished = actualBitString.length - strippedBitString.length;
-      } else {
-        unfinished = getBitString(false).length % 8;
-      }
+
+      unfinished = getBitString(false).length % 8;
       // const canMoveLeft = direction &&
       // (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0);
       // const canMoveRight = !direction &&
@@ -489,15 +488,17 @@ const BitList = forwardRef((props, ref) => {
 
       if (
         direction &&
-        (byteNumber === 0 || (byteNumber === 1 && unfinished > 0))
+        (byteNumber === 0 || (byteNumber === 1 && !fill && unfinished > 0))
       ) {
+        //move left
         return false;
       } else if (
         !direction &&
         (Math.ceil(getBitString(true, fillWith).length / 8) ===
           byteNumber + 1 ||
-          (byteNumber === 0 && unfinished > 0))
+          (byteNumber === 0 && !fill && unfinished > 0))
       ) {
+        //move right
         return false;
       } else {
         return true;
@@ -846,15 +847,15 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteValues = () => {
     const renderByteValuesResult = [];
-    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
+    let counter = Math.ceil(getBitString(false, fillWith).length / 8);
 
     for (
       let i = 0;
-      i < Math.ceil(getBitString(true, fillWith).length / 8);
+      i < Math.ceil(getBitString(false, fillWith).length / 8);
       i++
     ) {
       let byteNumber =
-        Math.ceil(getBitString(true, fillWith).length / 8) - counter;
+        Math.ceil(getBitString(false, fillWith).length / 8) - counter;
 
       renderByteValuesResult.push(
         <div className="cell byte_values byte_values_cell" key={i}>
@@ -884,15 +885,15 @@ const BitList = forwardRef((props, ref) => {
 
   const renderByteButtons = () => {
     const renderByteButtonsResult = [];
-    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
+    let counter = Math.ceil(getBitString(false, fillWith).length / 8);
 
     for (
       let i = 0;
-      i < Math.ceil(getBitString(true, fillWith).length / 8);
+      i < Math.ceil(getBitString(false, fillWith).length / 8);
       i++
     ) {
       let byteNumber =
-        Math.ceil(getBitString(true, fillWith).length / 8) - counter;
+        Math.ceil(getBitString(false, fillWith).length / 8) - counter;
 
       renderByteButtonsResult.push(
         <div className="cell byte_buttons byte_buttons_cell" key={i}>
@@ -923,11 +924,8 @@ const BitList = forwardRef((props, ref) => {
             <button
               onClick={() =>
                 byteInvert(
-                  getByteStartPosition(
-                    byteNumber,
-                    getBitString(fill, fillWith)
-                  ),
-                  getByteEndPosition(byteNumber, getBitString(fill, fillWith))
+                  getByteStartPosition(byteNumber, getBitString(false, "")),
+                  getByteEndPosition(byteNumber, getBitString(false, ""))
                 )
               }
             >
