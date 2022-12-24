@@ -400,3 +400,36 @@
   height: 1.5rem;
   padding: 10px 5px;
 }
+
+.byteInformationSwitchWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.byteInformationSwitchRadioButtonOutline {
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  height: 35px;
+  width: 35px;
+  align-items: center;
+}
+
+.byteInformationSwitchRadioButton {
+  height: 25px;
+  width: 25px;
+  cursor: pointer;
+  margin: 0;
+}
+
+input[type="radio"]:checked:after {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  position: relative;
+  background-color: rgb(36, 36, 36);
+
+  content: "";
+  display: inline-block;
+  visibility: visible;
+}

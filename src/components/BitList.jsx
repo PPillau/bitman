@@ -37,6 +37,12 @@ export const OPERATIONS = {
   DIVISION: 10,
 };
 
+export const BYTEINFORMATIONSWITCH = {
+  INPUT: 0,
+  BITSTRING: 1,
+  OUTPUT: 2,
+};
+
 const BitList = forwardRef((props, ref) => {
   const {
     areaId = 0,
@@ -58,6 +64,9 @@ const BitList = forwardRef((props, ref) => {
   const [decValue, setDecValue] = useState("");
   const [hexValue, setHexValue] = useState("");
   const [bitOperation, setBitOperation] = useState(inputBitOperation);
+  const [byteInformationSwitch, setByteInformationSwitch] = useState(
+    BYTEINFORMATIONSWITCH.INPUT
+  );
 
   const bitInputRef = createRef();
 
@@ -362,6 +371,11 @@ const BitList = forwardRef((props, ref) => {
     },
     [bitString, setBitString, setSelection]
   );
+
+  const handleByteInformationSwitchChange = useCallback((e) => {
+    setByteInformationSwitch(BYTEINFORMATIONSWITCH[e.target.value]);
+    console.log(e.target.value, "--------");
+  }, []);
 
   /* ----------------- END UI callbacks ----------------- */
 
@@ -973,6 +987,45 @@ const BitList = forwardRef((props, ref) => {
                   options={Object.keys(OPERATIONS)}
                   onChange={handleOperationChange}
                 ></Dropdown>
+                <div className="byteInformationSwitchWrapper">
+                  <div className="byteInformationSwitchRadioButtonOutline background_3">
+                    <input
+                      name="sticky"
+                      className="byteInformationSwitchRadioButton"
+                      type="radio"
+                      value="INPUT"
+                      checked={
+                        byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT
+                      }
+                      onChange={handleByteInformationSwitchChange}
+                    />
+                  </div>
+                  <div className="byteInformationSwitchRadioButtonOutline background_1">
+                    <input
+                      name="sticky"
+                      className="byteInformationSwitchRadioButton"
+                      type="radio"
+                      value="BITSTRING"
+                      checked={
+                        byteInformationSwitch ===
+                        BYTEINFORMATIONSWITCH.BITSTRING
+                      }
+                      onChange={handleByteInformationSwitchChange}
+                    />
+                  </div>
+                  <div className="byteInformationSwitchRadioButtonOutline background_4">
+                    <input
+                      name="sticky"
+                      className="byteInformationSwitchRadioButton"
+                      type="radio"
+                      value="OUTPUT"
+                      checked={
+                        byteInformationSwitch === BYTEINFORMATIONSWITCH.OUTPUT
+                      }
+                      onChange={handleByteInformationSwitchChange}
+                    />
+                  </div>
+                </div>
               </>
             )}
 
