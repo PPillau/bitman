@@ -65,7 +65,7 @@ const BitList = forwardRef((props, ref) => {
   const [hexValue, setHexValue] = useState("");
   const [bitOperation, setBitOperation] = useState(inputBitOperation);
   const [byteInformationSwitch, setByteInformationSwitch] = useState(
-    BYTEINFORMATIONSWITCH.INPUT
+    BYTEINFORMATIONSWITCH.BITSTRING
   );
 
   const bitInputRef = createRef();
@@ -134,7 +134,21 @@ const BitList = forwardRef((props, ref) => {
   );
 
   const getByte = (pos, withFiller = true, filler = "") => {
-    let actualBitString = getBitString(withFiller, filler);
+    const getStringWithRegardToSwitch = () => {
+      if (byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING) {
+        return getBitString(withFiller, filler);
+      } else if (byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT) {
+        return inputBitString;
+      } else {
+        if (getBitString(fill, fillWith).length === inputBitString.length) {
+          return bitwiseOperation(bitString, inputBitString);
+        } else {
+          return "";
+        }
+      }
+    };
+
+    let actualBitString = getStringWithRegardToSwitch();
     if (Math.ceil(actualBitString.length / 8) < pos) {
       return "";
     }
@@ -374,7 +388,6 @@ const BitList = forwardRef((props, ref) => {
 
   const handleByteInformationSwitchChange = useCallback((e) => {
     setByteInformationSwitch(BYTEINFORMATIONSWITCH[e.target.value]);
-    console.log(e.target.value, "--------");
   }, []);
 
   /* ----------------- END UI callbacks ----------------- */
@@ -840,14 +853,38 @@ const BitList = forwardRef((props, ref) => {
   };
 
   const renderByteRulers = () => {
-    const renderByteRulersResult = [];
-    let counter = Math.ceil(getBitString(true, fillWith).length / 8);
+    let actualLength;
+    let filler = 0;
+    let filledLength = getBitString(true, fillWith).length;
+    if (byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING) {
+      if (inputBitString.length > 0 && fill) {
+        actualLength = getBitString(fill, fillWith).length;
+      } else {
+        actualLength = getBitString(fill, fillWith).length;
+        filler =
+          Math.ceil(filledLength / 8) * 8 -
+          Math.ceil(getBitString(false, fillWith).length / 8) * 8;
+      }
+    } else {
+      actualLength = getBiggerOfBothString(fill);
+    }
 
-    for (
-      let i = 0;
-      i < Math.ceil(getBitString(true, fillWith).length / 8);
-      i++
-    ) {
+    const renderByteRulersResult = [];
+    let counter = Math.ceil(actualLength / 8);
+
+    if (filler > 0) {
+      renderByteRulersResult.push(
+        <div
+          className="cell  byte_ruler_cell"
+          key="-1"
+          style={{
+            gridColumnEnd: `span ${filler * 5}`,
+          }}
+        ></div>
+      );
+    }
+
+    for (let i = 0; i < Math.ceil(actualLength / 8); i++) {
       renderByteRulersResult.push(
         <div className="cell byte_ruler byte_ruler_cell" key={i}>
           <span className="byte_label">Byte {counter}</span>
@@ -860,14 +897,38 @@ const BitList = forwardRef((props, ref) => {
   };
 
   const renderByteValues = () => {
+    let actualLength;
+    let filler = 0;
+    let filledLength = getBitString(true, fillWith).length;
+    if (byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING) {
+      if (inputBitString.length > 0 && fill) {
+        actualLength = getBitString(fill, fillWith).length;
+      } else {
+        actualLength = getBitString(fill, fillWith).length;
+        filler =
+          Math.ceil(filledLength / 8) * 8 -
+          Math.ceil(getBitString(false, fillWith).length / 8) * 8;
+      }
+    } else {
+      actualLength = getBiggerOfBothString(fill);
+    }
+
     const renderByteValuesResult = [];
     let counter = Math.ceil(getBitString(false, fillWith).length / 8);
 
-    for (
-      let i = 0;
-      i < Math.ceil(getBitString(false, fillWith).length / 8);
-      i++
-    ) {
+    if (filler > 0) {
+      renderByteValuesResult.push(
+        <div
+          className="cell byte_values byte_values_cell"
+          key="-1"
+          style={{
+            gridColumnEnd: `span ${filler * 5}`,
+          }}
+        ></div>
+      );
+    }
+
+    for (let i = 0; i < Math.ceil(actualLength / 8); i++) {
       let byteNumber =
         Math.ceil(getBitString(false, fillWith).length / 8) - counter;
 
@@ -898,14 +959,38 @@ const BitList = forwardRef((props, ref) => {
   };
 
   const renderByteButtons = () => {
+    let actualLength;
+    let filler = 0;
+    let filledLength = getBitString(true, fillWith).length;
+    if (byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING) {
+      if (inputBitString.length > 0 && fill) {
+        actualLength = getBitString(fill, fillWith).length;
+      } else {
+        actualLength = getBitString(fill, fillWith).length;
+        filler =
+          Math.ceil(filledLength / 8) * 8 -
+          Math.ceil(getBitString(false, fillWith).length / 8) * 8;
+      }
+    } else {
+      actualLength = getBiggerOfBothString(fill);
+    }
+
     const renderByteButtonsResult = [];
     let counter = Math.ceil(getBitString(false, fillWith).length / 8);
 
-    for (
-      let i = 0;
-      i < Math.ceil(getBitString(false, fillWith).length / 8);
-      i++
-    ) {
+    if (filler > 0) {
+      renderByteButtonsResult.push(
+        <div
+          className="cell byte_buttons byte_buttons_cell"
+          key="-1"
+          style={{
+            gridColumnEnd: `span ${filler * 5}`,
+          }}
+        ></div>
+      );
+    }
+
+    for (let i = 0; i < Math.ceil(actualLength / 8); i++) {
       let byteNumber =
         Math.ceil(getBitString(false, fillWith).length / 8) - counter;
 
