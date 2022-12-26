@@ -441,6 +441,13 @@ const BitList = forwardRef((props, ref) => {
           getHexValueBasic(bitwiseOperation(bitString, inputBitString))
         )
       );
+    } else {
+      setDecValue(
+        formatDecimal(getDecValueBasic(getBitString(fill, fillWith)))
+      );
+      setHexValue(
+        formatDecimal(getHexValueBasic(getBitString(fill, fillWith)))
+      );
     }
   }, [byteInformationSwitch, decValue, hexValue, bitString]);
 
