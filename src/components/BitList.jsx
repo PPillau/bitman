@@ -426,6 +426,24 @@ const BitList = forwardRef((props, ref) => {
     }
   }, [bitString, fill, fillWith, stickyCursor]);
 
+  useEffect(() => {
+    if (byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT) {
+      setDecValue(formatDecimal(getDecValueBasic(inputBitString)));
+      setHexValue(formatDecimal(getHexValueBasic(inputBitString)));
+    } else if (byteInformationSwitch === BYTEINFORMATIONSWITCH.OUTPUT) {
+      setDecValue(
+        formatDecimal(
+          getDecValueBasic(bitwiseOperation(bitString, inputBitString))
+        )
+      );
+      setHexValue(
+        formatDecimal(
+          getHexValueBasic(bitwiseOperation(bitString, inputBitString))
+        )
+      );
+    }
+  }, [byteInformationSwitch, decValue, hexValue, bitString]);
+
   /* ----------------- END use effects & management ----------------- */
 
   /* ----------------- START helper methods ----------------- */
@@ -972,7 +990,7 @@ const BitList = forwardRef((props, ref) => {
           Math.ceil(getBitString(false, fillWith).length / 8) * 8;
       }
     } else {
-      actualLength = getBiggerOfBothString(fill);
+      return "";
     }
 
     const renderByteButtonsResult = [];
@@ -1047,6 +1065,9 @@ const BitList = forwardRef((props, ref) => {
 
   /* ----------------- END render methods ----------------- */
 
+  const isSwitchNotOnBitstring =
+    byteInformationSwitch !== BYTEINFORMATIONSWITCH.BITSTRING;
+
   return (
     <Fragment key={actualKey}>
       <div className="bitlist" id={`bitlist_area_${areaId}`} ref={ref}>
@@ -1064,7 +1085,7 @@ const BitList = forwardRef((props, ref) => {
                   X
                 </button>
                 <Dropdown
-                  value={Object.keys(OPERATIONS)[0]}
+                  value={Object.keys(OPERATIONS)[bitOperation]}
                   className="operations_dropdown"
                   controlClassName="operations_dropdown_control"
                   menuClassName="operations_dropdown_menu"
@@ -1121,6 +1142,7 @@ const BitList = forwardRef((props, ref) => {
                 name="dec_input"
                 value={decValue}
                 onChange={handleDecInputChange}
+                disabled={isSwitchNotOnBitstring}
               ></input>
             </div>
             <div className="input_wrapper">
@@ -1134,13 +1156,21 @@ const BitList = forwardRef((props, ref) => {
                 readOnly
               ></input>
             </div>
-            <button onClick={deleteAllFromList}>
+            <button
+              onClick={deleteAllFromList}
+              disabled={isSwitchNotOnBitstring}
+              className={`${isSwitchNotOnBitstring ? "button_disabled" : ""}`}
+            >
               <FontAwesomeIcon icon={faTrashCan} />
             </button>
             <button onClick={copyAllFromListToClipboard}>
               <FontAwesomeIcon icon={faCopy} />
             </button>
-            <button onClick={() => invert(0, bitString.length)}>
+            <button
+              onClick={() => invert(0, bitString.length)}
+              disabled={isSwitchNotOnBitstring}
+              className={`${isSwitchNotOnBitstring ? "button_disabled" : ""}`}
+            >
               <FontAwesomeIcon icon={faRepeat} />
             </button>
             <div className={`fillerBox box ${fill ? "" : "grey"}`}>
@@ -1151,12 +1181,16 @@ const BitList = forwardRef((props, ref) => {
                 type="checkbox"
                 checked={fill}
                 onChange={handleFillChange}
+                disabled={isSwitchNotOnBitstring}
+                className={`${
+                  isSwitchNotOnBitstring ? "checkbox_disabled" : ""
+                }`}
               />
               <Dropdown
                 options={["0", "1"]}
                 value={fillWith}
                 onChange={handleFillWithChange}
-                disabled={!fill}
+                disabled={!fill || isSwitchNotOnBitstring}
                 className="dropdown"
                 controlClassName="dropdown_control"
                 menuClassName="dropdown_menu"
@@ -1170,6 +1204,10 @@ const BitList = forwardRef((props, ref) => {
                 type="checkbox"
                 checked={stickyCursor}
                 onChange={handleStickyCursorChange}
+                disabled={isSwitchNotOnBitstring}
+                className={`${
+                  isSwitchNotOnBitstring ? "checkbox_disabled" : ""
+                }`}
               />
             </div>
           </>

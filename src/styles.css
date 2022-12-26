@@ -33,31 +33,33 @@ button.add_operation {
   border: none;
 }
 
-.add_operation_container .operations_dropdown {
+.top_container .add_operation_container .operations_dropdown {
   background-color: rgb(36, 36, 36);
-  width: 150px;
+  width: 190px;
   height: 45px;
   border-radius: 5px;
   color: white;
   font-size: 1.3rem;
   border: 1px solid rgb(36, 36, 36);
+  z-index: 10;
 }
 
-.add_operation_container .operations_dropdown_control {
+.top_container .add_operation_container .operations_dropdown_control {
+  cursor: pointer;
 }
 
-.add_operation_container .operations_dropdown_menu {
+.top_container .add_operation_container .operations_dropdown_menu {
   background-color: white;
   color: black;
   border: 1px solid rgb(36, 36, 36);
 }
 
-.add_operation_container .operations_dropdown_menu div {
+.top_container .add_operation_container .operations_dropdown_menu div {
   height: 1.5rem;
   padding: 10px 5px;
 }
 
-.add_operation_container .operations_dropdown_placeholder {
+.top_container .add_operation_container .operations_dropdown_placeholder {
   height: 1.5rem;
   padding: 10px 5px;
 }

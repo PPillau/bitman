@@ -51,7 +51,7 @@ const App = () => {
   };
 
   return (
-    <>
+    <div className="top_container">
       {lists.map((list, i) => {
         if (i === 0) {
           return firstElement;
@@ -83,7 +83,7 @@ const App = () => {
           <FontAwesomeIcon icon={faAdd} />
         </button>
       </div>
-    </>
+    </div>
   );
 };
 
