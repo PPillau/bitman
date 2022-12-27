@@ -29,8 +29,8 @@ export const OPERATIONS = {
   NOT: 2,
   XOR: 3,
   NOR: 4,
-  SHIFT_LEFT: 5,
-  SHIFT_RIGHT: 6,
+  NAND: 5,
+  SHIFT: 6,
   ADDITION: 7,
   SUBTRACTION: 8,
   MULTIPLICAITON: 9,
@@ -317,8 +317,21 @@ const BitList = forwardRef((props, ref) => {
   /* ----------------- START UI callbacks ----------------- */
 
   const copyAllFromListToClipboard = useCallback(() => {
-    navigator.clipboard.writeText(getBitString(fill, fillWith));
-  }, [fill, fillWith, bitString]);
+    let actualBitString;
+    if (byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING) {
+      actualBitString = getBitString(fill, filler);
+    } else if (byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT) {
+      actualBitString = inputBitString;
+    } else {
+      if (getBitString(fill, fillWith).length === inputBitString.length) {
+        actualBitString = bitwiseOperation(bitString, inputBitString);
+      } else {
+        return "";
+      }
+    }
+
+    navigator.clipboard.writeText(actualBitString);
+  }, [fill, fillWith, bitString, byteInformationSwitch]);
 
   const copyByteToClipboad = useCallback(
     (byteNumber) => {
@@ -503,14 +516,22 @@ const BitList = forwardRef((props, ref) => {
     );
   };
 
-  const invert = (pos, amount) => {
-    changeToNewStringAt(
-      getRealBitSize(
-        dec2bin(~parseInt(getBitString(false).substring(pos, pos + amount), 2)),
-        getBitString(false).substring(pos, pos + amount)
-      ),
-      pos
-    );
+  const invert = (pos, amount, string = "") => {
+    if (!string) {
+      string = getBitString(false);
+      changeToNewStringAt(
+        getRealBitSize(
+          dec2bin(~parseInt(string.substring(pos, pos + amount), 2)),
+          string.substring(pos, pos + amount)
+        ),
+        pos
+      );
+    } else {
+      return getRealBitSize(
+        dec2bin(~parseInt(string.substring(pos, pos + amount), 2)),
+        string.substring(pos, pos + amount)
+      );
+    }
   };
 
   const byteInvert = (start, end) => {
@@ -561,6 +582,7 @@ const BitList = forwardRef((props, ref) => {
 
   const bitwiseOperation = useCallback(() => {
     let result = "";
+    let tempResult = "";
     const actualBitString = getBitString(fill, fillWith);
     switch (bitOperation) {
       case OPERATIONS.AND:
@@ -572,6 +594,25 @@ const BitList = forwardRef((props, ref) => {
         result = (
           parseInt(inputBitString, 2) | parseInt(actualBitString, 2)
         ).toString(2);
+        break;
+      case OPERATIONS.XOR:
+        result = (
+          parseInt(inputBitString, 2) ^ parseInt(actualBitString, 2)
+        ).toString(2);
+        break;
+      case OPERATIONS.NOR:
+        tempResult = (
+          parseInt(inputBitString, 2) | parseInt(actualBitString, 2)
+        ).toString(2);
+        tempResult = _.padStart(tempResult, actualBitString.length, "0");
+        result = invert(0, tempResult.length, tempResult).toString(2);
+        break;
+      case OPERATIONS.NAND:
+        tempResult = (
+          parseInt(inputBitString, 2) & parseInt(actualBitString, 2)
+        ).toString(2);
+        tempResult = _.padStart(tempResult, actualBitString.length, "0");
+        result = invert(0, tempResult.length, tempResult).toString(2);
         break;
     }
 
