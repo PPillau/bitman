@@ -19,6 +19,10 @@
   grid-template-rows: repeat(2, 3rem) 1rem repeat(5, 3rem);
 }
 
+.bitbox.input_extended_small {
+  grid-template-rows: repeat(1, 3rem) 1rem repeat(5, 3rem);
+}
+
 .button_area {
   height: 45px;
   padding-bottom: 10px;
@@ -115,6 +119,34 @@
 
 .input_extended .byte_buttons_cell {
   grid-row-start: 8;
+}
+
+/* extended row-positions */
+
+/* extended row-positions */
+
+.input_extended_small .operation_results_separator {
+  grid-row-start: 2;
+}
+
+.input_extended_small .operation_bit_section {
+  grid-row-start: 3;
+}
+
+.input_extended_small .bit_number_cell {
+  grid-row-start: 4;
+}
+
+.input_extended_small .byte_ruler_cell {
+  grid-row-start: 5;
+}
+
+.input_extended_small .byte_values_cell {
+  grid-row-start: 6;
+}
+
+.input_extended_small .byte_buttons_cell {
+  grid-row-start: 7;
 }
 
 /* extended row-positions */

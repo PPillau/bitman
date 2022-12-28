@@ -19,9 +19,11 @@ import {
   faArrowLeft,
   faArrowsLeftRightToLine,
   faICursor,
+  faAdd,
 } from "@fortawesome/free-solid-svg-icons";
 import _, { result, update } from "lodash";
 import Dropdown from "react-dropdown";
+import BitChain from "./BitChain";
 
 export const OPERATIONS = {
   AND: 0,
@@ -31,10 +33,7 @@ export const OPERATIONS = {
   NOR: 4,
   NAND: 5,
   SHIFT: 6,
-  ADDITION: 7,
-  SUBTRACTION: 8,
-  MULTIPLICAITON: 9,
-  DIVISION: 10,
+  MATH: 7,
 };
 
 export const BYTEINFORMATIONSWITCH = {
@@ -64,9 +63,33 @@ const BitList = forwardRef((props, ref) => {
   const [decValue, setDecValue] = useState("");
   const [hexValue, setHexValue] = useState("");
   const [bitOperation, setBitOperation] = useState(inputBitOperation);
+
+  const isSingleStringOperation = (operation) => {
+    if (operation === undefined || operation === null) {
+      return bitOperation === OPERATIONS.NOT;
+    } else {
+      return operation === OPERATIONS.NOT;
+    }
+  };
+
   const [byteInformationSwitch, setByteInformationSwitch] = useState(
-    BYTEINFORMATIONSWITCH.BITSTRING
+    isSingleStringOperation(inputBitOperation)
+      ? BYTEINFORMATIONSWITCH.OUTPUT
+      : BYTEINFORMATIONSWITCH.BITSTRING
   );
+  const [operationResult, setOperationResult] = useState("");
+  const [bitChainList, setBitChainList] = useState([]);
+
+  const addNewBitChain = useCallback(() => {
+    setBitChainList([...bitChainList, 0]);
+  }, [bitChainList, setBitChainList]);
+
+  const deleteBitChain = (index) => {
+    setBitChainList((oldChainList) => {
+      oldChainList.splice(index, 1);
+      return [...oldChainList];
+    });
+  };
 
   const bitInputRef = createRef();
 
@@ -358,8 +381,25 @@ const BitList = forwardRef((props, ref) => {
   const handleOperationChange = useCallback(
     (option) => {
       setBitOperation(OPERATIONS[option.value]);
+      if (
+        isSingleStringOperation(OPERATIONS[option.value]) &&
+        byteInformationSwitch === BYTEINFORMATIONSWITCH.BITSTRING
+      ) {
+        setByteInformationSwitch(BYTEINFORMATIONSWITCH.OUTPUT);
+      } else if (
+        !isSingleStringOperation(OPERATIONS[option.value]) &&
+        byteInformationSwitch !== BYTEINFORMATIONSWITCH.BITSTRING &&
+        isSingleStringOperation()
+      ) {
+        setByteInformationSwitch(BYTEINFORMATIONSWITCH.BITSTRING);
+      }
     },
-    [setBitOperation]
+    [
+      setBitOperation,
+      byteInformationSwitch,
+      setByteInformationSwitch,
+      bitOperation,
+    ]
   );
 
   const handleDecTextChange = useCallback(
@@ -437,7 +477,21 @@ const BitList = forwardRef((props, ref) => {
     if (stickyCursor) {
       setCaretPosition(getCaretPosition() - 1);
     }
-  }, [bitString, fill, fillWith, stickyCursor]);
+
+    if (bitString.length === inputBitString.length) {
+      setOperationResult(bitwiseOperation(bitString, inputBitString));
+    } else {
+      setOperationResult("");
+    }
+  }, [
+    bitString,
+    fill,
+    fillWith,
+    stickyCursor,
+    inputBitString,
+    byteInformationSwitch,
+    bitOperation,
+  ]);
 
   useEffect(() => {
     if (byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT) {
@@ -581,6 +635,10 @@ const BitList = forwardRef((props, ref) => {
   );
 
   const bitwiseOperation = useCallback(() => {
+    if ((inputBitString === "") | (bitString === "")) {
+      return "";
+    }
+
     let result = "";
     let tempResult = "";
     const actualBitString = getBitString(fill, fillWith);
@@ -594,6 +652,9 @@ const BitList = forwardRef((props, ref) => {
         result = (
           parseInt(inputBitString, 2) | parseInt(actualBitString, 2)
         ).toString(2);
+        break;
+      case OPERATIONS.NOT:
+        result = invert(0, inputBitString.length, inputBitString).toString(2);
         break;
       case OPERATIONS.XOR:
         result = (
@@ -616,7 +677,8 @@ const BitList = forwardRef((props, ref) => {
         break;
     }
 
-    return result.padStart(actualBitString.length, "0");
+    const actualResult = result.padStart(actualBitString.length, "0");
+    return actualResult;
   }, [bitOperation, bitString, inputBitString, fill, fillWith]);
 
   /* ----------------- END helper methods ----------------- */
@@ -831,9 +893,6 @@ const BitList = forwardRef((props, ref) => {
         const bitElement = (
           <Bit
             id={`bitElement_${counter}`}
-            className={classNames({
-              "ds-selected": _.inRange(ind, selection[0], selection[1]),
-            })}
             key={counter}
             index={bitCounter}
             type="3"
@@ -855,7 +914,10 @@ const BitList = forwardRef((props, ref) => {
     const actualBitString = getBitString(fill, fillWith);
     const renderBitOperationResult = [];
 
-    if (actualBitString.length !== inputBitString.length) {
+    if (
+      actualBitString.length !== inputBitString.length &&
+      !isSingleStringOperation()
+    ) {
       const length = getBiggerOfBothString(fill);
       for (let i = 0; i < length; i++) {
         renderBitOperationResult.push(
@@ -867,6 +929,7 @@ const BitList = forwardRef((props, ref) => {
     } else {
       //The actual magic
       const operationResult = bitwiseOperation(bitString, inputBitString);
+
       for (let i = 0; i < operationResult.length; i++) {
         renderBitOperationResult.push(
           <Bit type="4" key={i}>
@@ -1154,19 +1217,21 @@ const BitList = forwardRef((props, ref) => {
                       onChange={handleByteInformationSwitchChange}
                     />
                   </div>
-                  <div className="byteInformationSwitchRadioButtonOutline background_1">
-                    <input
-                      name="sticky"
-                      className="byteInformationSwitchRadioButton"
-                      type="radio"
-                      value="BITSTRING"
-                      checked={
-                        byteInformationSwitch ===
-                        BYTEINFORMATIONSWITCH.BITSTRING
-                      }
-                      onChange={handleByteInformationSwitchChange}
-                    />
-                  </div>
+                  {!isSingleStringOperation() && (
+                    <div className="byteInformationSwitchRadioButtonOutline background_1">
+                      <input
+                        name="sticky"
+                        className="byteInformationSwitchRadioButton"
+                        type="radio"
+                        value="BITSTRING"
+                        checked={
+                          byteInformationSwitch ===
+                          BYTEINFORMATIONSWITCH.BITSTRING
+                        }
+                        onChange={handleByteInformationSwitchChange}
+                      />
+                    </div>
+                  )}
                   <div className="byteInformationSwitchRadioButtonOutline background_4">
                     <input
                       name="sticky"
@@ -1190,7 +1255,7 @@ const BitList = forwardRef((props, ref) => {
                 name="dec_input"
                 value={decValue}
                 onChange={handleDecInputChange}
-                disabled={isSwitchNotOnBitstring}
+                disabled={isSwitchNotOnBitstring || isSingleStringOperation()}
               ></input>
             </div>
             <div className="input_wrapper">
@@ -1206,8 +1271,12 @@ const BitList = forwardRef((props, ref) => {
             </div>
             <button
               onClick={deleteAllFromList}
-              disabled={isSwitchNotOnBitstring}
-              className={`${isSwitchNotOnBitstring ? "button_disabled" : ""}`}
+              disabled={isSwitchNotOnBitstring || isSingleStringOperation()}
+              className={`${
+                isSwitchNotOnBitstring || isSingleStringOperation()
+                  ? "button_disabled"
+                  : ""
+              }`}
             >
               <FontAwesomeIcon icon={faTrashCan} />
             </button>
@@ -1216,8 +1285,12 @@ const BitList = forwardRef((props, ref) => {
             </button>
             <button
               onClick={() => invert(0, bitString.length)}
-              disabled={isSwitchNotOnBitstring}
-              className={`${isSwitchNotOnBitstring ? "button_disabled" : ""}`}
+              disabled={isSwitchNotOnBitstring || isSingleStringOperation()}
+              className={`${
+                isSwitchNotOnBitstring || isSingleStringOperation()
+                  ? "button_disabled"
+                  : ""
+              }`}
             >
               <FontAwesomeIcon icon={faRepeat} />
             </button>
@@ -1229,16 +1302,20 @@ const BitList = forwardRef((props, ref) => {
                 type="checkbox"
                 checked={fill}
                 onChange={handleFillChange}
-                disabled={isSwitchNotOnBitstring}
+                disabled={isSwitchNotOnBitstring || isSingleStringOperation()}
                 className={`${
-                  isSwitchNotOnBitstring ? "checkbox_disabled" : ""
+                  isSwitchNotOnBitstring || isSingleStringOperation()
+                    ? "checkbox_disabled"
+                    : ""
                 }`}
               />
               <Dropdown
                 options={["0", "1"]}
                 value={fillWith}
                 onChange={handleFillWithChange}
-                disabled={!fill || isSwitchNotOnBitstring}
+                disabled={
+                  !fill || isSwitchNotOnBitstring || isSingleStringOperation()
+                }
                 className="dropdown"
                 controlClassName="dropdown_control"
                 menuClassName="dropdown_menu"
@@ -1252,9 +1329,11 @@ const BitList = forwardRef((props, ref) => {
                 type="checkbox"
                 checked={stickyCursor}
                 onChange={handleStickyCursorChange}
-                disabled={isSwitchNotOnBitstring}
+                disabled={isSwitchNotOnBitstring || isSingleStringOperation()}
                 className={`${
-                  isSwitchNotOnBitstring ? "checkbox_disabled" : ""
+                  isSwitchNotOnBitstring || isSingleStringOperation()
+                    ? "checkbox_disabled"
+                    : ""
                 }`}
               />
             </div>
@@ -1264,7 +1343,9 @@ const BitList = forwardRef((props, ref) => {
           id={`bitlist_box_area_${areaId}`}
           className={classNames({
             bitbox: true,
-            input_extended: inputBitString.length > 0,
+            input_extended:
+              inputBitString.length > 0 && !isSingleStringOperation(),
+            input_extended_small: isSingleStringOperation(),
           })}
         >
           {renderInputBitsFiller()}
@@ -1277,24 +1358,30 @@ const BitList = forwardRef((props, ref) => {
           >
             {renderInputBits()}
           </div>
-          {renderFillerBits()}
-          <div
-            className="bit_section"
-            style={{
-              gridColumnEnd: `span ${getBitSectionFillAmount()}`,
-            }}
-          >
-            {renderBits()}
-            <input
-              type="text"
-              className="bit_input_field"
-              onChange={handleBitInputChange}
-              onKeyDown={bit_input_bin_checker}
-              onSelect={handleSelect}
-              ref={bitInputRef}
-              value={bitString}
-            ></input>
-          </div>
+
+          {!isSingleStringOperation() && (
+            <>
+              {renderFillerBits()}
+              <div
+                className="bit_section"
+                style={{
+                  gridColumnEnd: `span ${getBitSectionFillAmount()}`,
+                }}
+              >
+                {renderBits()}
+                <input
+                  type="text"
+                  className="bit_input_field"
+                  onChange={handleBitInputChange}
+                  onKeyDown={bit_input_bin_checker}
+                  onSelect={handleSelect}
+                  ref={bitInputRef}
+                  value={bitString}
+                ></input>
+              </div>
+            </>
+          )}
+
           {inputBitString.length > 0 && (
             <>
               <div
@@ -1321,6 +1408,33 @@ const BitList = forwardRef((props, ref) => {
           {renderByteValues()}
           {renderByteButtons()}
         </div>
+        {isDeletable && operationResult !== "" && (
+          <>
+            {bitChainList.length === 0 && (
+              <div className="add_operation_container">
+                <Dropdown
+                  value={Object.keys(OPERATIONS)[0]}
+                  className="operations_dropdown"
+                  controlClassName="operations_dropdown_control"
+                  menuClassName="operations_dropdown_menu"
+                  placeholderClassName="operations_dropdown_placeholder"
+                  options={Object.keys(OPERATIONS)}
+                ></Dropdown>
+                <button className="add_operation" onClick={addNewBitChain}>
+                  <FontAwesomeIcon icon={faAdd} />
+                </button>
+              </div>
+            )}
+            {bitChainList.map((chain, i) => {
+              return (
+                <BitChain
+                  chainInputBitString={operationResult}
+                  deleteBitChainCallback={() => deleteBitChain(i)}
+                ></BitChain>
+              );
+            })}
+          </>
+        )}
       </div>
     </Fragment>
   );
