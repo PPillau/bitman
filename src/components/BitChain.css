@@ -43,7 +43,7 @@ button.add_operation {
   color: white;
   font-size: 1.3rem;
   border: 1px solid rgb(36, 36, 36);
-  z-index: 10;
+  z-index: 5;
 }
 
 .top_container .add_operation_container .operations_dropdown_control {

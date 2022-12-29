@@ -9,6 +9,7 @@ import "./BitChain.css";
 const BitChain = ({
   chainInputBitString = "",
   deleteBitChainCallback = undefined,
+  chainInputOperation = OPERATIONS.AND,
 }) => {
   const ref = useRef();
   const [, updateState] = useState();
@@ -25,6 +26,11 @@ const BitChain = ({
       ref={ref}
       updateCallback={updateCallback}
       inputBitString={chainInputBitString !== "" ? chainInputBitString : ""}
+      isDeletable={chainInputBitString !== ""}
+      isFullyDeletable={chainInputBitString !== ""}
+      inputBitOperation={
+        chainInputBitString !== "" ? chainInputOperation : OPERATIONS.AND
+      }
     />
   );
   const [operation, setOperation] = useState(0);
@@ -88,20 +94,22 @@ const BitChain = ({
           );
         }
       })}
-      <div className="add_operation_container">
-        <Dropdown
-          value={Object.keys(OPERATIONS)[0]}
-          className="operations_dropdown"
-          controlClassName="operations_dropdown_control"
-          menuClassName="operations_dropdown_menu"
-          placeholderClassName="operations_dropdown_placeholder"
-          options={Object.keys(OPERATIONS)}
-          onChange={handleOperationChange}
-        ></Dropdown>
-        <button className="add_operation" onClick={addNewBitList}>
-          <FontAwesomeIcon icon={faAdd} />
-        </button>
-      </div>
+      {(!ref || !ref.current || ref.current.getBitStringRef().length > 0) && (
+        <div className="add_operation_container">
+          <Dropdown
+            value={Object.keys(OPERATIONS)[0]}
+            className="operations_dropdown"
+            controlClassName="operations_dropdown_control"
+            menuClassName="operations_dropdown_menu"
+            placeholderClassName="operations_dropdown_placeholder"
+            options={Object.keys(OPERATIONS)}
+            onChange={handleOperationChange}
+          ></Dropdown>
+          <button className="add_operation" onClick={addNewBitList}>
+            <FontAwesomeIcon icon={faAdd} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

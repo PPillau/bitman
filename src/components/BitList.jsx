@@ -52,6 +52,7 @@ const BitList = forwardRef((props, ref) => {
     updateCallback = undefined,
     inputBitOperation = OPERATIONS.AND,
     actualKey,
+    isFullyDeletable = false,
   } = props;
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState("");
@@ -63,6 +64,7 @@ const BitList = forwardRef((props, ref) => {
   const [decValue, setDecValue] = useState("");
   const [hexValue, setHexValue] = useState("");
   const [bitOperation, setBitOperation] = useState(inputBitOperation);
+  const [newBitOperation, setNewBitOperation] = useState(OPERATIONS.AND);
 
   const isSingleStringOperation = (operation) => {
     if (operation === undefined || operation === null) {
@@ -98,8 +100,9 @@ const BitList = forwardRef((props, ref) => {
     useCallback(
       () => ({
         getBitStringRef: () => getBitString(fill, fillWith),
+        getBitStringResultRef: () => operationResult,
       }),
-      [fill, fillWith, bitString]
+      [fill, fillWith, bitString, operationResult]
     )
   );
 
@@ -402,6 +405,13 @@ const BitList = forwardRef((props, ref) => {
     ]
   );
 
+  const handleNewOperationChange = useCallback(
+    (operation) => {
+      setNewBitOperation(OPERATIONS[operation.value]);
+    },
+    [setNewBitOperation]
+  );
+
   const handleDecTextChange = useCallback(
     (e) => {
       setDecValue(formatDecimal(e.target.value));
@@ -478,7 +488,7 @@ const BitList = forwardRef((props, ref) => {
       setCaretPosition(getCaretPosition() - 1);
     }
 
-    if (bitString.length === inputBitString.length) {
+    if (getBitString(fill, fillWith).length === inputBitString.length) {
       setOperationResult(bitwiseOperation(bitString, inputBitString));
     } else {
       setOperationResult("");
@@ -1186,21 +1196,23 @@ const BitList = forwardRef((props, ref) => {
           <>
             {isDeletable && (
               <>
-                <button
-                  onClick={
-                    deleteBitListCallback !== undefined
-                      ? deleteBitListCallback
-                      : null
-                  }
-                >
-                  X
-                </button>
+                {!isFullyDeletable && (
+                  <button
+                    onClick={
+                      deleteBitListCallback !== undefined
+                        ? deleteBitListCallback
+                        : null
+                    }
+                  >
+                    X
+                  </button>
+                )}
                 <Dropdown
                   value={Object.keys(OPERATIONS)[bitOperation]}
-                  className="operations_dropdown"
-                  controlClassName="operations_dropdown_control"
-                  menuClassName="operations_dropdown_menu"
-                  placeholderClassName="operations_dropdown_placeholder"
+                  className="operations_dropdown_1"
+                  controlClassName="operations_dropdown_control_1"
+                  menuClassName="operations_dropdown_menu_1"
+                  placeholderClassName="operations_dropdown_placeholder_1"
                   options={Object.keys(OPERATIONS)}
                   onChange={handleOperationChange}
                 ></Dropdown>
@@ -1209,7 +1221,7 @@ const BitList = forwardRef((props, ref) => {
                     <input
                       name="sticky"
                       className="byteInformationSwitchRadioButton"
-                      type="radio"
+                      type="checkbox"
                       value="INPUT"
                       checked={
                         byteInformationSwitch === BYTEINFORMATIONSWITCH.INPUT
@@ -1222,7 +1234,7 @@ const BitList = forwardRef((props, ref) => {
                       <input
                         name="sticky"
                         className="byteInformationSwitchRadioButton"
-                        type="radio"
+                        type="checkbox"
                         value="BITSTRING"
                         checked={
                           byteInformationSwitch ===
@@ -1236,7 +1248,7 @@ const BitList = forwardRef((props, ref) => {
                     <input
                       name="sticky"
                       className="byteInformationSwitchRadioButton"
-                      type="radio"
+                      type="checkbox"
                       value="OUTPUT"
                       checked={
                         byteInformationSwitch === BYTEINFORMATIONSWITCH.OUTPUT
@@ -1414,13 +1426,14 @@ const BitList = forwardRef((props, ref) => {
               <div className="add_operation_container">
                 <Dropdown
                   value={Object.keys(OPERATIONS)[0]}
-                  className="operations_dropdown"
-                  controlClassName="operations_dropdown_control"
-                  menuClassName="operations_dropdown_menu"
-                  placeholderClassName="operations_dropdown_placeholder"
+                  className="operations_dropdown_1"
+                  controlClassName="operations_dropdown_control_1"
+                  menuClassName="operations_dropdown_menu_1"
+                  placeholderClassName="operations_dropdown_placeholder_1"
                   options={Object.keys(OPERATIONS)}
+                  onChange={handleNewOperationChange}
                 ></Dropdown>
-                <button className="add_operation" onClick={addNewBitChain}>
+                <button className="add_operation_1" onClick={addNewBitChain}>
                   <FontAwesomeIcon icon={faAdd} />
                 </button>
               </div>
@@ -1430,6 +1443,7 @@ const BitList = forwardRef((props, ref) => {
                 <BitChain
                   chainInputBitString={operationResult}
                   deleteBitChainCallback={() => deleteBitChain(i)}
+                  chainInputOperation={newBitOperation}
                 ></BitChain>
               );
             })}
