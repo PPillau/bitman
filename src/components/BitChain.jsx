@@ -1,15 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAdd } from "@fortawesome/free-solid-svg-icons";
-import { hot } from "react-hot-loader";
 import BitList, { OPERATIONS } from "./BitList.jsx";
 import Dropdown from "react-dropdown";
-import { useState, useCallback, createRef, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import "./BitChain.css";
 
 const BitChain = ({
   chainInputBitString = "",
   deleteBitChainCallback = undefined,
-  chainInputOperation = OPERATIONS.AND,
+  chainInputOperation = OPERATIONS.AND
 }) => {
   const ref = useRef();
   const [, updateState] = useState();

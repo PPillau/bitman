@@ -4,7 +4,7 @@ import {
   useEffect,
   forwardRef,
   useImperativeHandle,
-  Fragment,
+  Fragment
 } from "react";
 import useState from "react-usestateref";
 import "./BitList.css";
@@ -19,9 +19,9 @@ import {
   faArrowLeft,
   faArrowsLeftRightToLine,
   faICursor,
-  faAdd,
+  faAdd
 } from "@fortawesome/free-solid-svg-icons";
-import _, { result, update } from "lodash";
+import _ from "lodash";
 import Dropdown from "react-dropdown";
 import BitChain from "./BitChain";
 
@@ -33,13 +33,13 @@ export const OPERATIONS = {
   NOR: 4,
   NAND: 5,
   SHIFT: 6,
-  MATH: 7,
+  MATH: 7
 };
 
 export const BYTEINFORMATIONSWITCH = {
   INPUT: 0,
   BITSTRING: 1,
-  OUTPUT: 2,
+  OUTPUT: 2
 };
 
 const BitList = forwardRef((props, ref) => {
@@ -52,7 +52,7 @@ const BitList = forwardRef((props, ref) => {
     updateCallback = undefined,
     inputBitOperation = OPERATIONS.AND,
     actualKey,
-    isFullyDeletable = false,
+    isFullyDeletable = false
   } = props;
   const [cursorPosition, setCursorPosition, refCursorPosition] = useState(0);
   const [bitString, setBitString, refBitString] = useState("");
@@ -100,7 +100,7 @@ const BitList = forwardRef((props, ref) => {
     useCallback(
       () => ({
         getBitStringRef: () => getBitString(fill, fillWith),
-        getBitStringResultRef: () => operationResult,
+        getBitStringResultRef: () => operationResult
       }),
       [fill, fillWith, bitString, operationResult]
     )
@@ -401,7 +401,7 @@ const BitList = forwardRef((props, ref) => {
       setBitOperation,
       byteInformationSwitch,
       setByteInformationSwitch,
-      bitOperation,
+      bitOperation
     ]
   );
 
@@ -500,7 +500,7 @@ const BitList = forwardRef((props, ref) => {
     stickyCursor,
     inputBitString,
     byteInformationSwitch,
-    bitOperation,
+    bitOperation
   ]);
 
   useEffect(() => {
@@ -685,6 +685,8 @@ const BitList = forwardRef((props, ref) => {
         tempResult = _.padStart(tempResult, actualBitString.length, "0");
         result = invert(0, tempResult.length, tempResult).toString(2);
         break;
+      default:
+        break;
     }
 
     const actualResult = result.padStart(actualBitString.length, "0");
@@ -775,7 +777,7 @@ const BitList = forwardRef((props, ref) => {
           <div
             className="bit_section"
             style={{
-              gridColumnEnd: `span ${completeDifference * 5}`,
+              gridColumnEnd: `span ${completeDifference * 5}`
             }}
           ></div>
         )}
@@ -783,7 +785,7 @@ const BitList = forwardRef((props, ref) => {
           <div
             className="bit_section"
             style={{
-              gridColumnEnd: `span ${fillDifference * 5}`,
+              gridColumnEnd: `span ${fillDifference * 5}`
             }}
           >
             {renderFillerBitsResult}
@@ -811,7 +813,7 @@ const BitList = forwardRef((props, ref) => {
         <div
           className="input_bitstring_filler_cell"
           style={{
-            gridColumnEnd: `span ${fillAmount * 5}`,
+            gridColumnEnd: `span ${fillAmount * 5}`
           }}
         ></div>
       );
@@ -833,7 +835,7 @@ const BitList = forwardRef((props, ref) => {
         <div
           className="operation_bit_section"
           style={{
-            gridColumnEnd: `span ${difference * 5}`,
+            gridColumnEnd: `span ${difference * 5}`
           }}
         ></div>
       );
@@ -852,7 +854,7 @@ const BitList = forwardRef((props, ref) => {
         <div
           className="cell bit_number_cell bit_number bit_number_invisible"
           style={{
-            gridColumnEnd: `span ${difference * 5}`,
+            gridColumnEnd: `span ${difference * 5}`
           }}
         ></div>
       );
@@ -873,7 +875,7 @@ const BitList = forwardRef((props, ref) => {
           <Bit
             id={`bitElement_${counter}`}
             className={classNames({
-              "ds-selected": _.inRange(ind, selection[0], selection[1]),
+              "ds-selected": _.inRange(ind, selection[0], selection[1])
             })}
             key={counter}
             index={bitCounter}
@@ -1017,7 +1019,7 @@ const BitList = forwardRef((props, ref) => {
           className="cell  byte_ruler_cell"
           key="-1"
           style={{
-            gridColumnEnd: `span ${filler * 5}`,
+            gridColumnEnd: `span ${filler * 5}`
           }}
         ></div>
       );
@@ -1061,7 +1063,7 @@ const BitList = forwardRef((props, ref) => {
           className="cell byte_values byte_values_cell"
           key="-1"
           style={{
-            gridColumnEnd: `span ${filler * 5}`,
+            gridColumnEnd: `span ${filler * 5}`
           }}
         ></div>
       );
@@ -1123,7 +1125,7 @@ const BitList = forwardRef((props, ref) => {
           className="cell byte_buttons byte_buttons_cell"
           key="-1"
           style={{
-            gridColumnEnd: `span ${filler * 5}`,
+            gridColumnEnd: `span ${filler * 5}`
           }}
         ></div>
       );
@@ -1357,7 +1359,7 @@ const BitList = forwardRef((props, ref) => {
             bitbox: true,
             input_extended:
               inputBitString.length > 0 && !isSingleStringOperation(),
-            input_extended_small: isSingleStringOperation(),
+            input_extended_small: isSingleStringOperation()
           })}
         >
           {renderInputBitsFiller()}
@@ -1365,7 +1367,7 @@ const BitList = forwardRef((props, ref) => {
           <div
             className="input_bitstring_cell"
             style={{
-              gridColumnEnd: `span ${getInputBitSectionFillAmount()}`,
+              gridColumnEnd: `span ${getInputBitSectionFillAmount()}`
             }}
           >
             {renderInputBits()}
@@ -1377,7 +1379,7 @@ const BitList = forwardRef((props, ref) => {
               <div
                 className="bit_section"
                 style={{
-                  gridColumnEnd: `span ${getBitSectionFillAmount()}`,
+                  gridColumnEnd: `span ${getBitSectionFillAmount()}`
                 }}
               >
                 {renderBits()}
@@ -1401,14 +1403,14 @@ const BitList = forwardRef((props, ref) => {
                 style={{
                   gridColumnEnd: `span ${
                     getLengthRoundedToNextByte(getBiggerOfBothString()) * 5
-                  }`,
+                  }`
                 }}
               ></div>
               {renderResultBitsFiller()}
               <div
                 className="operation_bit_section"
                 style={{
-                  gridColumnEnd: `span ${getBiggerOfBothString(fill) * 5}`,
+                  gridColumnEnd: `span ${getBiggerOfBothString(fill) * 5}`
                 }}
               >
                 {renderBitOperationResult()}

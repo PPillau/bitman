@@ -14,15 +14,13 @@
     "react-dom": "^17.0.2",
     "react-dropdown": "^1.11.0",
     "react-hot-loader": "^4.13.0",
-    "react-router-dom": "^6.2.1",
     "react-scripts": "4.0.3",
     "react-tooltip": "^4.2.21",
     "react-usestateref": "^1.0.8"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "rm -rf dist && webpack --mode development",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -rf dist && webpack --mode development"
   },
   "eslintConfig": {
     "extends": [

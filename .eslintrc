@@ -4,11 +4,13 @@
     "ecmaVersion": 2020
   },
   "plugins": ["unused-imports"],
+  "extends": ["react-app"], // this important to make eslint parser for jsx files work correctly
   "rules": {
-    "no-unused-vars": "warn", // or "@typescript-eslint/no-unused-vars": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "no-unused-vars": "off", // or "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-imports": "warn",
     "unused-imports/no-unused-vars": [
-      "warn",
+      "off",
       {
         "vars": "all",
         "varsIgnorePattern": "^_",
@@ -16,13 +18,13 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "no-duplicate-imports": 2,
-    "no-var": 2,
-    "prefer-spread": 2,
-    "eqeqeq": 2,
-    "no-console": 1,
-    "no-extra-semi": 2,
-    "no-empty": 2,
-    "no-unreachable": 2
+    "no-var": "error",
+    "no-duplicate-imports": "error",
+    "no-console": "warn",
+    "no-extra-semi": "error",
+    "no-empty": "warn",
+    "no-unreachable": "warn",
+    "eqeqeq": "error",
+    "prefer-spread": "error"
   }
 }

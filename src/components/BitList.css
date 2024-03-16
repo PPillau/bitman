@@ -363,7 +363,7 @@
   height: 45px;
   padding: 0;
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   font-weight: bold;
   width: 180px;
 }
